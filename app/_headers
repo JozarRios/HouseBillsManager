@@ -1,0 +1,10 @@
+/*
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+
+/config.js
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache

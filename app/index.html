@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Bills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f6f9; --surface:#ffffff; --surface2:#f4f4f7; --ink:#2b2c40; --ink2:#55566c; --muted:#9a9ab0; --line:#eeeef3;
+  --accent:#e8704f; --accent-soft:#fdefea; --navy:#33345a; --navy-soft:#ebebf4;
+  --yellow:#f2c35e; --yellow-soft:#fdf5e2; --green:#2fa877; --green-soft:#e4f5ee; --red:#e5484d; --red-soft:#fdecec;
+  --shadow:0 1px 2px rgba(40,40,80,.03); --pop:0 14px 36px rgba(40,40,80,.13);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15161c; --surface:#1d1e26; --surface2:#262732; --ink:#ececf3; --ink2:#c4c5d3; --muted:#8a8ba0; --line:#2d2e3a;
+    --accent:#f07f5e; --accent-soft:#3a2620; --navy:#2c2e58; --navy-soft:#262844;
+    --yellow:#f0c368; --yellow-soft:#382f1c; --green:#4cc493; --green-soft:#1b3329; --red:#f0716f; --red-soft:#3a2122;
+    --shadow:none; --pop:0 14px 36px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#15161c; --surface:#1d1e26; --surface2:#262732; --ink:#ececf3; --ink2:#c4c5d3; --muted:#8a8ba0; --line:#2d2e3a;
+    --accent:#f07f5e; --accent-soft:#3a2620; --navy:#2c2e58; --navy-soft:#262844;
+    --yellow:#f0c368; --yellow-soft:#382f1c; --green:#4cc493; --green-soft:#1b3329; --red:#f0716f; --red-soft:#3a2122;
+    --shadow:none; --pop:0 14px 36px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:13.5px/1.5 Poppins,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.num,td.n,th.n{font-variant-numeric:tabular-nums}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh;transition:grid-template-columns .2s ease}
+.side{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:26px 14px 18px;overflow:hidden;z-index:40}
+.brand{font-weight:700;font-size:22px;letter-spacing:-.01em;padding:0 12px 34px;white-space:nowrap}
+.brand .dot{color:var(--accent)}
+.brand .mini{display:none}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:10px;color:var(--muted);font-weight:500;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background .15s,color .15s}
+.nav a:hover{color:var(--ink);background:var(--surface2)}
+.nav a.on{color:var(--accent);background:var(--accent-soft)}
+.nav a svg{flex:none}
+.nav-sep{height:1px;background:var(--line);margin:14px 12px}
+.side-foot{margin-top:auto;background:var(--navy);color:#fff;border-radius:14px;padding:16px;white-space:normal}
+.side-foot .k{font-size:11.5px;opacity:.7}
+.side-foot .v{font-weight:600;font-size:15px;margin-top:2px}
+.side-foot button{margin-top:12px;width:100%;border:0;background:var(--accent);color:#fff;border-radius:9px;padding:8px;font-weight:600;cursor:pointer}
+@media (min-width:901px){
+  .layout.collapsed{grid-template-columns:78px minmax(0,1fr)}
+  .layout.collapsed .nav a span,.layout.collapsed .side-foot,.layout.collapsed .brand .full{display:none}
+  .layout.collapsed .brand .mini{display:inline}
+  .layout.collapsed .brand{padding:0 0 34px;text-align:center}
+  .layout.collapsed .nav a{justify-content:center;padding:12px 0}
+}
+.scrim{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;left:0;top:0;width:260px;transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--pop)}
+  .layout.drawer .side{transform:none}
+  .layout.drawer .scrim{display:block;position:fixed;inset:0;background:rgba(20,20,35,.35);z-index:39}
+}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px;padding:14px 28px}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:inline-grid;vertical-align:middle;place-items:center;cursor:pointer;color:var(--ink2);flex:none}
+.icon-btn:hover{color:var(--accent)}
+.icon-btn.sm{width:32px;height:32px;border-radius:8px}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.top-title{font-weight:600;color:var(--muted)}
+.top-date{display:flex;align-items:center;gap:8px;color:var(--ink2);font-weight:500;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 12px}
+main{padding:6px 28px 70px;max-width:1340px}
+@media (max-width:600px){ .topbar{padding:12px 16px} main{padding:4px 16px 60px} .top-date span{display:none} }
+
+/* ---------- type & blocks ---------- */
+h1{font-size:24px;font-weight:700;letter-spacing:-.015em;margin:0}
+h2{font-size:15.5px;font-weight:600;margin:0}
+.sub{color:var(--muted);margin:2px 0 0;font-size:13px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:18px}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-main{grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);align-items:start}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g-main{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.g2{grid-template-columns:minmax(0,1fr)!important}}
+@media (max-width:520px){.g4{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px;min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.mt{margin-top:18px}
+.muted{color:var(--muted)} .small{font-size:12px} .strong{font-weight:600}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+
+.kpi{display:flex;align-items:center;gap:16px}
+.kpi .ico{width:54px;height:54px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;flex:none;color:var(--accent)}
+.kpi .ico.y{color:var(--yellow)} .kpi .ico.n{color:#6e70c9} .kpi .ico.g{color:var(--green)}
+.kpi .v{font-size:23px;font-weight:700;letter-spacing:-.01em;line-height:1.15;white-space:nowrap}
+.kpi .l{color:var(--muted);font-size:12.5px}
+.kpi .h{font-size:11.5px;margin-top:3px;color:var(--muted)}
+.up{color:var(--red)} .down{color:var(--green)}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.warn{background:var(--yellow-soft);color:#b98a1f}
+:root[data-theme="dark"] .pill.warn{color:var(--yellow)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pill.warn{color:var(--yellow)}}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.pill.info{background:var(--accent-soft);color:var(--accent)}
+.pill.mute{background:var(--surface2);color:var(--muted)}
+
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.dark{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink2)}
+.btn.ghost:hover{background:var(--surface2)}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.seg{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:10px 14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.seg button.on{color:var(--accent);border-color:var(--accent)}
+
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);font-weight:500;min-width:0}
+input,select{font:inherit;color:var(--ink);background:var(--surface2);border:1px solid transparent;border-radius:10px;padding:9px 12px;min-width:0}
+input:focus,select:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+input.cell{width:104px;text-align:right;padding:6px 9px}
+input.need{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:var(--accent-soft)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+
+/* ---------- dropdown & calendar ---------- */
+.dd,.cal{position:relative}
+.dd-btn{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:7px 12px 7px 7px;min-width:180px;cursor:pointer;text-align:left;width:100%}
+.dd-btn:hover{border-color:var(--muted)}
+.dd.open .dd-btn,.cal.open .dd-btn{border-color:var(--accent)}
+.dd-btn .lead{width:34px;height:34px;border-radius:9px;background:var(--surface2);display:grid;place-items:center;color:var(--accent);flex:none}
+.dd-lab{display:flex;flex-direction:column;line-height:1.25;flex:1;min-width:0}
+.dd-lab small{font-size:11px;color:var(--muted)}
+.dd-lab b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-btn > svg:last-child{color:var(--muted);flex:none;transition:transform .15s}
+.dd.open .dd-btn > svg:last-child,.cal.open .dd-btn > svg:last-child{transform:rotate(180deg)}
+.dd.plain .dd-btn{min-width:150px;padding:8px 12px}
+.dd-menu,.cal-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--pop);padding:6px;min-width:100%;display:none}
+.right .dd-menu,.right .cal-pop{left:auto;right:0}
+.dd.open .dd-menu,.cal.open .cal-pop{display:block}
+.dd-menu{max-height:330px;overflow:auto}
+.dd-opt{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 10px;border-radius:9px;cursor:pointer;text-align:left;white-space:nowrap}
+.dd-opt:hover{background:var(--surface2)}
+.dd-opt.on{color:var(--accent);font-weight:600}
+.dd-opt small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+.dd-opt i{width:9px;height:9px;border-radius:3px;flex:none}
+.dd-opt svg{margin-left:auto}
+.cal-pop{width:310px;max-width:calc(100vw - 32px);padding:16px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-head b{font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.cal-nav{border:0;background:none;width:30px;height:30px;border-radius:8px;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.cal-nav:hover{background:var(--surface2);color:var(--ink)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:3px}
+.cal-wd{font-size:11px;color:var(--muted);text-align:center;padding:4px 0 6px}
+.cal-wd.sun{color:var(--accent)}
+.cal-d{height:34px;border:0;background:none;font-size:12.5px;cursor:pointer;position:relative;padding:0}
+.cal-d span{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px}
+.cal-d:hover span{background:var(--surface2)}
+.cal-d.out{opacity:.35}
+.cal-d.rng{background:var(--accent-soft)}
+.cal-d.rs{border-radius:9px 0 0 9px} .cal-d.re{border-radius:0 9px 9px 0} .cal-d.rs.re{border-radius:9px}
+.cal-d.end span{background:var(--accent);color:#fff}
+.cal-d.today span{box-shadow:inset 0 0 0 1.5px var(--navy)}
+.cal-d.dot::after{content:'';position:absolute;top:3px;right:7px;width:5px;height:5px;border-radius:50%;background:#6e70c9}
+.cal-foot{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:11.5px;cursor:pointer;color:var(--ink2)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.cal-note{font-size:11px;color:var(--muted);margin-top:8px}
+.cal-months{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cal-m{border:0;background:var(--surface2);padding:11px 0;border-radius:9px;cursor:pointer;font-weight:500}
+.cal-m:hover{outline:1px solid var(--accent)}
+.cal-m.on{background:var(--accent);color:#fff}
+.cal-m.today{box-shadow:inset 0 0 0 1.5px var(--navy)}
+
+/* ---------- tables & lists ---------- */
+.tbl-wrap{overflow-x:auto;margin:0 -20px;padding:0 20px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11.5px;color:var(--muted);font-weight:500}
+td.n,th.n{text-align:right}
+tr.group td{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:14px 10px 6px;border-bottom:0}
+tr.total td{font-weight:600;border-top:1.5px solid var(--ink);border-bottom:0}
+tr.bill td{color:var(--muted)}
+.who{display:flex;align-items:center;gap:10px}
+.av{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:600;font-size:11.5px;flex:none;color:#fff}
+.list{display:flex;flex-direction:column}
+.list .item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list .item:last-child{border-bottom:0}
+.item .tile{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.item .tile.e{background:var(--accent);color:#fff}
+.item .tile.r{background:var(--yellow);color:#fff}
+.item .grow{flex:1;min-width:0}
+.item .t{font-weight:600}
+.item .s{color:var(--muted);font-size:11.5px}
+.item .acts{display:flex;align-items:center;gap:6px}
+@media (max-width:600px){.list .item{flex-wrap:wrap}.item .grow{flex:1 1 calc(100% - 56px)}.item .acts{width:100%;padding-left:52px}.item .acts .strong{margin-right:auto}}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap;align-items:center}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;border:2px solid currentColor}
+.stat-mini{display:flex;gap:26px;margin-bottom:6px;flex-wrap:wrap}
+.stat-mini small{display:block;color:var(--muted);font-size:11px}
+.stat-mini b{font-size:14px}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
+.donut-legend{width:100%}
+.donut-legend div{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12.5px}
+.donut-legend i{width:12px;height:12px;border-radius:3px;flex:none}
+.donut-legend span{flex:1;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.summary .box{background:var(--surface2);border-radius:12px;padding:12px 14px}
+.summary .box .l{font-size:11.5px;color:var(--muted)}
+.summary .box .v{font-size:17px;font-weight:700;margin-top:2px}
+.summary .box.dark{background:var(--navy);color:#fff}
+.summary .box.dark .l{color:rgba(255,255,255,.7)}
+.note{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:12.5px}
+.note.soft{background:var(--surface2)}
+.bar{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.check{display:inline-flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.check input{width:16px;height:16px;accent-color:var(--accent)}
+svg text{fill:var(--muted);font-size:11px;font-family:inherit}
+
+/* ---------- settings ---------- */
+.acc{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:14px}
+.acc-h{display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none}
+.acc-h .tile{width:42px;height:42px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.acc-h .grow{flex:1;min-width:0}
+.acc-h .chev{color:var(--muted);transition:transform .2s;display:grid}
+.acc.open .acc-h .chev{transform:rotate(180deg)}
+.acc-b{display:none;padding:0 20px 20px;border-top:1px solid var(--line)}
+.acc.open .acc-b{display:block}
+.form-box{background:var(--surface2);border-radius:12px;padding:16px;margin:14px 0}
+.form-box input{background:var(--surface)}
+.form-box .dd-btn{background:var(--surface);min-width:0}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.switch{position:relative;width:38px;height:22px;flex:none;display:inline-block}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.switch i{position:absolute;inset:0;background:var(--line);border-radius:99px;cursor:pointer;transition:.15s}
+.switch i::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked + i{background:var(--accent)}
+.switch input:checked + i::after{transform:translateX(16px)}
+
+/* ---------- overlays ---------- */
+.chart-tip{position:fixed;pointer-events:none;background:var(--navy);color:#fff;padding:7px 10px;border-radius:8px;font-size:11.5px;z-index:80;display:none;white-space:nowrap;box-shadow:var(--pop)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-weight:500;opacity:0;transition:.2s;z-index:90;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(20,20,35,.45);display:none;place-items:center;z-index:70;padding:16px}
+.modal.open{display:grid}
+.modal-card{background:var(--surface);border-radius:16px;max-width:480px;width:100%;max-height:92vh;overflow:auto;padding:18px;box-shadow:var(--pop)}
+.modal-card img{width:100%;display:block;border-radius:10px;border:1px solid var(--line)}
+.st-preview img{width:100%;border-radius:12px;border:1px solid var(--line);display:block;min-height:200px}
+
+/* ---------- auth & sync ---------- */
+.auth{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:100;padding:16px}
+.auth[hidden]{display:none}
+.auth-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:30px;width:100%;max-width:380px;box-shadow:var(--pop)}
+.auth-card input{width:100%}
+.au-err{color:var(--red);font-size:12.5px;margin-top:10px;min-height:1em}
+body.locked .layout{display:none}
+.sync{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);white-space:nowrap}
+.sync[hidden]{display:none}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.sync.pending i{background:var(--yellow)} .sync.error i{background:var(--red)}
+@media (max-width:600px){.sync span{display:none}}
+/* ---------- print ---------- */
+#print-root{display:none}
+.print-head{display:none}
+@media print{
+  @page{margin:14mm}
+  body{background:#fff;color:#111;font-size:11.5px}
+  .side,.topbar,.no-print,.scrim{display:none!important}
+  .layout{display:block}
+  body.print-one .layout{display:none}
+  body.print-one #print-root{display:block}
+  .card{border:0;box-shadow:none;padding:0}
+  .print-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:14px}
+  .print-head b{font-size:18px}
+  .summary .box{border:1px solid #ddd;background:#fff!important;color:#111!important}
+  .summary .box.dark .l{color:#666!important}
+  .pill{border:1px solid currentColor;background:#fff!important}
+  th,td{padding:6px 6px}
+  .tbl-wrap{overflow:visible;margin:0;padding:0}
+  .print-block{break-inside:avoid;margin-bottom:18px}
+}
+</style>
+</head>
+<body>
+<div class="layout" id="layout">
+  <aside class="side">
+    <div class="brand"><span class="full">House Bills<span class="dot">.</span></span><span class="mini">H<span class="dot">.</span></span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="side-foot"></div>
+  </aside>
+  <div class="scrim" onclick="toggleDrawer(false)"></div>
+  <div style="min-width:0">
+    <header class="topbar">
+      <button class="icon-btn" onclick="toggleSidebar()" aria-label="Toggle menu" id="menu-btn"></button>
+      <div class="top-title" id="top-title"></div>
+      <div class="spacer"></div>
+      <div class="sync" id="sync" hidden></div><div class="top-date" id="top-date"></div><button class="icon-btn" id="logout-btn" onclick="signOut()" title="Sign out" hidden></button>
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme" id="theme-btn"></button>
+    </header>
+    <main id="app"></main>
+  </div>
+</div>
+<div class="auth" id="auth" hidden><form class="auth-card" onsubmit="signIn(event)">
+  <div class="brand" style="padding:0 0 22px">House Bills<span class="dot">.</span></div>
+  <h1>Sign in</h1><p class="sub" style="margin-bottom:20px">Your bills and rent are saved securely in the cloud.</p>
+  <label class="f">Email<input type="email" id="au-email" required autocomplete="username"></label>
+  <label class="f" style="margin-top:12px">Password<input type="password" id="au-pass" required autocomplete="current-password"></label>
+  <div class="au-err" id="au-err"></div>
+  <button class="btn primary" id="au-btn" style="width:100%;justify-content:center;margin-top:16px;padding:11px">Sign in</button>
+</form></div>
+<div id="print-root"></div>
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="modal-card" id="modal-card"></div></div>
+<div class="chart-tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script>
+/* =================================================================
+   House Bills — electric bill splitting + rent collection (prototype)
+   Data is saved in this browser (localStorage). Back it up from
+   Settings → Data & backup.
+   ================================================================= */
+const STORE_KEY = 'house-bills-proto-v1';
+const defMeters = ()=> structuredClone(window.SEED_METERS||[]);
+const defTenants = ()=> structuredClone(window.SEED_TENANTS||[]).map(t=>({phone:'', moveIn:'', active:true, deleted:false, min:0, rent:0, due:[], ...t}));
+const CFG = window.HB_CONFIG||{};
+const CLOUD = !!(CFG.supabaseUrl && CFG.supabaseAnonKey);
+const PALETTE = ['#e8704f','#f2c35e','#4b4d80','#8c7cf0','#2fa877','#4fa3e0','#f29cb3','#a0a3b8','#c9824a','#6bc4c0'];
+
+/* ---------- icons ---------- */
+const ICONS = {
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>',
+  zap:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>',
+  file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h10"/>',
+  chev:'<path d="m6 9 6 6 6-6"/>',
+  left:'<path d="m15 18-6-6 6-6"/>', right:'<path d="m9 18 6-6-6-6"/>',
+  cal:'<rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
+  gauge:'<path d="M12 14l4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.2A6.5 6.5 0 0 1 21.5 20"/>',
+  check:'<path d="M5 12.5 10 17l9-10"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  print:'<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>',
+  download:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2"/>',
+  alert:'<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16h.01"/>',
+  receipt:'<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  db:'<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  logout:'<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
+};
+const ic = (n,s=18,w=1.8)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const peso = (v,dec=0)=> v==null||isNaN(v) ? '—' : '₱'+Number(v).toLocaleString('en-PH',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+const kwhF = v => v==null||isNaN(v) ? '—' : Number(v).toLocaleString('en-PH',{minimumFractionDigits:1,maximumFractionDigits:1});
+const rd = (v,d=2)=> Math.round(v*10**d)/10**d;
+const roundup = v => Math.ceil(rd(v,6));          // Excel ROUNDUP(x,0)
+const sum = (a,f=x=>x)=> a.reduce((s,x,i)=>s+(Number(f(x,i))||0),0);
+const parseD = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+const isoD = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayISO = ()=> isoD(new Date());
+const addDays = (s,n)=>{ const d=parseD(s); d.setDate(d.getDate()+n); return isoD(d); };
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_L = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const fmtD = (s,yr=false)=>{ if(!s) return '—'; const d=parseD(s); return `${MONTHS[d.getMonth()]} ${d.getDate()}${yr?', '+d.getFullYear():''}`; };
+const periodLabel = p => p ? `${fmtD(p.from)} – ${fmtD(p.to,true)}` : '—';
+const shortPeriod = from => { const d=parseD(from); return `${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`; };
+const ym = s => s.slice(0,7);
+const ymLabel = k => { const [y,m]=k.split('-').map(Number); return `${MONTHS_L[m-1]} ${y}`; };
+const ymAdd = (k,n)=>{ const [y,m]=k.split('-').map(Number); const d=new Date(y,m-1+n,1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+const initials = n => n.replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).slice(-2).map(w=>w[0]).join('').toUpperCase() || '?';
+const uid = ()=> Math.random().toString(36).slice(2,8);
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const ordinal = n => { n=Number(n); const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); };
+
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),1900); }
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); }
+  catch{ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch{} ta.remove(); }
+  toast('Copied — paste it in Messenger / SMS');
+}
+
+/* ---------- state ---------- */
+let S;
+const meterById = id => S.meters.find(m=>m.id===id);
+const tenant = id => S.tenants.find(t=>t.id===id);
+const liveTenants = ()=> S.tenants.filter(t=>!t.deleted);
+const tColor = t => PALETTE[Math.max(0,S.tenants.indexOf(t))%PALETTE.length];
+const mColor = m => ['var(--accent)','var(--yellow)','#6e70c9','#2fa877','#4fa3e0'][Math.max(0,S.meters.indexOf(m))%5];
+
+function buildSeed(){
+  const raw = window.SEED_PERIODS||[];
+  const periods = raw.filter(p=>p.r!=null).map(p=>({
+    id:`${p.m}_${p.f}`, meter:p.m, from:p.f, to:p.t, bill:p.b, rate:p.r, mainPrev:p.mp, mainCurr:p.mc,
+    readings:Object.fromEntries(Object.entries(p.rd).map(([k,[a,b]])=>[k,{prev:a,curr:b}])), adj:{}, paid:{}, note:''
+  }));
+  const st = { version:2, meters:defMeters(), tenants:defTenants(), periods, rent:{}, rentStart: ym(todayISO()) };
+  // Prototype assumption: every period before the latest billed one is already collected.
+  for(const m of st.meters){
+    const list = periods.filter(p=>p.meter===m.id).sort((a,b)=>a.from.localeCompare(b.from));
+    list.slice(0,-1).forEach(p=>compute(p,st).rows.forEach(r=>{ if(r.ready) p.paid[r.t.id]=p.to; }));
+    const last = list[list.length-1];
+    if(last) st.periods.push(newPeriodFrom(m.id,last,st));
+  }
+  return st;
+}
+function migrate(s){
+  if(s && s.version===1){
+    s.meters = defMeters();
+    s.tenants.forEach(t=>{ t.phone=t.phone||''; t.moveIn=t.moveIn||''; t.deleted=false; });
+    s.version = 2;
+  }
+  return s;
+}
+function load(){
+  try{ const s=migrate(JSON.parse(localStorage.getItem(STORE_KEY))); if(s&&s.version===2){ S=s; save(); return; } }catch{}
+  S = buildSeed(); save();
+}
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch{} if(CLOUD) queueSync(); }
+const pref = (k,v)=>{ try{ if(v===undefined) return localStorage.getItem(STORE_KEY+':'+k); localStorage.setItem(STORE_KEY+':'+k,v); }catch{} };
+
+/* ---------- periods ---------- */
+const meterPeriods = (mid,st=S)=> st.periods.filter(p=>p.meter===mid).sort((a,b)=>a.from.localeCompare(b.from));
+const latestPeriod = mid => { const l=meterPeriods(mid); return l[l.length-1]; };
+const latestReady = mid => [...meterPeriods(mid)].reverse().find(p=>cc(p).ready);
+const periodAt = (mid,date)=> S.periods.find(p=>p.meter===mid && p.from<=date && date<=p.to) || null;
+function defaultDate(mids){
+  const froms = (mids||S.meters.map(m=>m.id)).map(id=>latestReady(id)).filter(Boolean).map(p=>p.from).sort();
+  return froms.length ? froms[froms.length-1] : todayISO();
+}
+function lastReadingFor(tid, beforeFrom, st=S){
+  const t = st.tenants.find(x=>x.id===tid);
+  const list = st.periods.filter(p=>p.meter===t.meter && p.from<beforeFrom && p.readings[tid] && p.readings[tid].curr!=null).sort((a,b)=>b.from.localeCompare(a.from));
+  return list[0] ? list[0].readings[tid].curr : 0;
+}
+function newPeriodFrom(mid,last,st=S){
+  const m = st.meters.find(x=>x.id===mid); const sd = Math.min(28,Math.max(1,Number(m?.startDay)||25));
+  let start;
+  if(last){ const d=parseD(last.from); start=new Date(d.getFullYear(), d.getMonth()+1, sd); }
+  else { const t=new Date(); start=new Date(t.getFullYear(),t.getMonth(),sd); if(start>t) start=new Date(t.getFullYear(),t.getMonth()-1,sd); }
+  const from = isoD(start), to = isoD(new Date(start.getFullYear(), start.getMonth()+1, sd-1));
+  const readings = {};
+  st.tenants.filter(t=>t.meter===mid && t.type==='submeter' && t.active && !t.deleted).forEach(t=>{ readings[t.id]={prev:lastReadingFor(t.id,from,st), curr:null}; });
+  return { id:`${mid}_${from}`, meter:mid, from, to, bill:null, rate:last?last.rate:null,
+           mainPrev: last&&last.mainCurr!=null?last.mainCurr:null, mainCurr:null, readings, adj:{}, paid:{}, note:'' };
+}
+function syncTenantsIntoLatest(p){
+  if(latestPeriod(p.meter)!==p) return;
+  S.tenants.filter(t=>t.meter===p.meter && t.type==='submeter' && t.active && !t.deleted && !p.readings[t.id])
+    .forEach(t=>{ p.readings[t.id]={prev:lastReadingFor(t.id,p.from),curr:null}; });
+}
+
+/* ---------- core computation (mirrors the spreadsheet) ----------
+   own submeter : ROUNDUP(kWh × rate) + top-up to the minimum charge
+   no submeter  : Meralco bill − sum of submeter amounts (split evenly)
+   adjustment   : any ± amount typed for a tenant                      */
+function compute(p, st=S){
+  const rows=[]; let subRaw=0, subKwh=0, pending=0;
+  for(const [tid,r] of Object.entries(p.readings)){
+    const t = st.tenants.find(x=>x.id===tid); if(!t) continue;
+    const ready = r.curr!=null && r.prev!=null && p.rate!=null;
+    const kwh = ready ? rd(r.curr-r.prev,2) : null;
+    const raw = ready ? roundup(Math.max(0,kwh)*p.rate) : null;
+    const minAdj = ready && t.min && raw<t.min ? t.min-raw : 0;
+    const manual = Number(p.adj[tid]||0);
+    if(ready){ subRaw+=raw; subKwh+=kwh; } else pending++;
+    rows.push({t,kind:'submeter',prev:r.prev,curr:r.curr,kwh,raw,minAdj,manual,total:ready?raw+minAdj+manual:null,ready,paid:p.paid[tid]||null});
+  }
+  rows.sort((a,b)=>st.tenants.indexOf(a.t)-st.tenants.indexOf(b.t));
+  const mainKwh = p.mainPrev!=null&&p.mainCurr!=null ? rd(p.mainCurr-p.mainPrev,2) : null;
+  const remT = st.tenants.filter(t=>t.meter===p.meter && t.type==='remainder' && ((t.active&&!t.deleted) || p.paid[t.id] || p.adj[t.id]));
+  const remainder = p.bill!=null && pending===0 ? Math.max(0,rd(p.bill-subRaw,2)) : null;
+  remT.forEach(t=>{
+    const share = remainder==null?null:roundup(remainder/remT.length), manual=Number(p.adj[t.id]||0);
+    rows.push({t,kind:'remainder',prev:null,curr:null,kwh:mainKwh!=null?rd((mainKwh-subKwh)/remT.length,1):null,
+      raw:share,minAdj:0,manual,total:share==null?null:share+manual,ready:share!=null,paid:p.paid[t.id]||null});
+  });
+  const ready = p.bill!=null && pending===0;
+  const totalDue = sum(rows,r=>r.total);
+  return { rows, subRaw, subKwh:rd(subKwh,2), mainKwh, remainder, pending, ready, totalDue,
+    collected: sum(rows,r=>r.paid?r.total:0),
+    outstanding: ready ? sum(rows,r=>r.ready&&!r.paid?r.total:0) : 0,
+    surplus: ready ? rd(totalDue-p.bill,2) : null,
+    suggestedRate: p.bill!=null&&mainKwh ? rd(p.bill/mainKwh,2) : null };
+}
+const CC = new Map(); // compute cache, cleared on every render
+function cc(p){ if(!CC.has(p)) CC.set(p,compute(p)); return CC.get(p); }
+
+/* ---------- rent ---------- */
+function rentDues(monthKey){
+  const [y,m]=monthKey.split('-').map(Number); const last=new Date(y,m,0).getDate(); const out=[];
+  const pre = monthKey < S.rentStart;
+  S.tenants.filter(t=>t.active && !t.deleted && t.rent>0 && t.due && t.due.length).forEach(t=>{
+    const per = rd(t.rent/t.due.length,2);
+    t.due.forEach((day,i)=>{
+      const date = `${monthKey}-${String(Math.min(day,last)).padStart(2,'0')}`;
+      if(t.moveIn && date < t.moveIn) return;
+      const key=`${t.id}#${i}`, rec=(S.rent[monthKey]||{})[key];
+      out.push({t,key,month:monthKey,date,amount:per,paid:rec?rec.on:(pre?date:null),assumed:!rec&&pre,part:t.due.length>1?`${i+1} of ${t.due.length}`:''});
+    });
+  });
+  return out.sort((a,b)=>a.date.localeCompare(b.date)||S.tenants.indexOf(a.t)-S.tenants.indexOf(b.t));
+}
+function rentDuesRange(from,to){
+  const out=[]; for(let k=ym(from); k<=ym(to); k=ymAdd(k,1)) rentDues(k).forEach(d=>{ if(d.date>=from&&d.date<=to) out.push(d); });
+  return out;
+}
+function setRentPaid(mk,key,on){ S.rent[mk]=S.rent[mk]||{}; if(on) S.rent[mk][key]={on}; else delete S.rent[mk][key]; save(); }
+function rentStatus(d){
+  if(d.assumed) return {cls:'mute',txt:'Before tracking'};
+  if(d.paid) return {cls:'ok',txt:`Paid ${fmtD(d.paid)}`};
+  const today=todayISO();
+  if(d.date<today) return {cls:'bad',txt:'Overdue'};
+  const days=Math.round((parseD(d.date)-parseD(today))/86400000);
+  if(days<=5) return {cls:'warn',txt:days===0?'Due today':`Due in ${days}d`};
+  return {cls:'mute',txt:'Upcoming'};
+}
+function allUnpaidElectric(){
+  const out=[]; S.periods.forEach(p=>{ const c=cc(p); if(!c.ready) return; c.rows.forEach(r=>{ if(r.ready&&!r.paid&&r.total>0) out.push({p,r}); }); });
+  return out.sort((a,b)=>a.p.from.localeCompare(b.p.from));
+}
+function rentOpenToDate(){
+  const out=[], cur=ym(todayISO()), soon=addDays(todayISO(),7);
+  for(let k=S.rentStart; k<=cur; k=ymAdd(k,1)) rentDues(k).forEach(d=>{ if(!d.paid && d.date<=soon) out.push(d); });
+  return out;
+}
+
+/* ---------- messages ---------- */
+function electricMsg(p,r){
+  const m=meterById(p.meter);
+  const L=[`Hi ${r.t.name}! Here's your electric bill (${m?m.name:''} meter).`,`Period: ${periodLabel(p)}`];
+  if(r.kind==='submeter'){ L.push(`Reading: ${kwhF(r.prev)} → ${kwhF(r.curr)} = ${kwhF(r.kwh)} kWh`,`Rate: ${peso(p.rate,2)}/kWh → ${peso(r.raw)}`); if(r.minAdj) L.push(`Minimum charge ${peso(r.t.min)} applied (+${peso(r.minAdj)})`); }
+  else L.push(`Meralco bill ${peso(p.bill,2)} − submetered ${peso(cc(p).subRaw)} = ${peso(r.raw)}`);
+  if(r.manual) L.push(`Adjustment: ${r.manual>0?'+':''}${peso(r.manual)}`);
+  L.push(`Amount due: ${peso(r.total)}`,'Thank you!');
+  return L.join('\n');
+}
+const rentMsg = d => `Hi ${d.t.name}! Friendly reminder: rent of ${peso(d.amount)}${d.part?` (${d.part})`:''} is due on ${fmtD(d.date,true)}. Thank you!`;
+
+/* ---------- charts ---------- */
+function niceMax(v){ if(v<=0) return 10; const p=Math.pow(10,Math.floor(Math.log10(v))); for(const m of [1,1.25,1.5,2,2.5,3,4,5,6,8,10]) if(m*p>=v) return m*p; return 10*p; }
+function lineChart(series, labels, {height=230, fmt=v=>v, axis=v=>v}={}){
+  const W=760,H=height,pl=48,pr=14,pt=14,pb=28;
+  const all=series.flatMap(s=>s.values).filter(v=>v!=null);
+  if(!all.length) return '<div class="empty">No data for this selection</div>';
+  const max=niceMax(Math.max(...all)*1.08);
+  const n=labels.length, x=i=>pl+(n<=1?(W-pl-pr)/2:i*(W-pl-pr)/(n-1)), y=v=>pt+(H-pt-pb)*(1-v/max);
+  let g='';
+  for(let k=0;k<=4;k++){ const v=max*k/4; g+=`<text x="${pl-10}" y="${y(v)+4}" text-anchor="end">${esc(axis(v))}</text>`; }
+  labels.forEach((l,i)=>{ g+=`<line x1="${x(i)}" x2="${x(i)}" y1="${pt}" y2="${H-pb}" stroke="var(--line)"/>`; if(i%Math.ceil(n/9)===0||i===n-1) g+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${esc(l)}</text>`; });
+  series.forEach(s=>{
+    let d='',on=false; s.values.forEach((v,i)=>{ if(v==null){on=false;return;} d+=(on?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' '; on=true; });
+    g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s.values.forEach((v,i)=>{ if(v!=null) g+=`<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="var(--surface)" stroke="${s.color}" stroke-width="2.2"/>`; });
+  });
+  labels.forEach((l,i)=>{ const w=(W-pl-pr)/Math.max(1,n-1); const tip=esc(l)+' — '+series.map(s=>`${esc(s.name)}: ${s.values[i]==null?'—':esc(fmt(s.values[i]))}`).join(' · ');
+    g+=`<rect x="${x(i)-w/2}" y="${pt}" width="${w}" height="${H-pt-pb}" fill="transparent" data-tip="${tip}"/>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${g}</svg>`;
+}
+function groupBars(series, labels, {height=230, fmt=v=>v, axis=v=>v}={}){
+  const W=760,H=height,pl=52,pr=10,pt=14,pb=28;
+  const all=series.flatMap(s=>s.values).map(v=>v||0); if(!all.some(Boolean)) return '<div class="empty">No data for this selection</div>';
+  const max=niceMax(Math.max(...all)*1.08), n=labels.length, gw=(W-pl-pr)/n, bw=Math.min(12,gw/(series.length+1.6));
+  const y=v=>pt+(H-pt-pb)*(1-v/max); let g='';
+  for(let k=0;k<=4;k++){ const v=max*k/4; g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-dasharray="${k?'3 4':''}"/><text x="${pl-10}" y="${y(v)+4}" text-anchor="end">${esc(axis(v))}</text>`; }
+  labels.forEach((l,i)=>{
+    const cx=pl+gw*i+gw/2, start=cx-(series.length*bw+(series.length-1)*4)/2;
+    series.forEach((s,j)=>{ const v=s.values[i]||0; g+=`<rect x="${start+j*(bw+4)}" y="${y(v)}" width="${bw}" height="${Math.max(0,H-pb-y(v))}" rx="${bw/2.4}" fill="${s.color}"/>`; });
+    g+=`<rect x="${pl+gw*i}" y="${pt}" width="${gw}" height="${H-pt-pb}" fill="transparent" data-tip="${esc(l)} — ${series.map(s=>esc(s.name)+': '+esc(fmt(s.values[i]||0))).join(' · ')}"/>`;
+    if(i%Math.ceil(n/12)===0||i===n-1) g+=`<text x="${cx}" y="${H-8}" text-anchor="middle">${esc(l)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${g}</svg>`;
+}
+function donut(items, centerTop, centerBottom){
+  const total=sum(items,i=>i.value); const R=74, C=2*Math.PI*R; let off=0, g='';
+  if(!total) return '<div class="empty">No amounts yet</div>';
+  items.forEach(it=>{ const len=it.value/total*C; if(len<=0) return;
+    g+=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="${it.color}" stroke-width="30" stroke-dasharray="${Math.max(0,len-2)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)" data-tip="${esc(it.label)}: ${esc(peso(it.value))} (${Math.round(it.value/total*100)}%)"/>`; off+=len; });
+  return `<svg viewBox="0 0 200 200" width="190" height="190">${g}<text x="100" y="98" text-anchor="middle" style="font-size:16px;font-weight:700;fill:var(--ink)">${esc(centerTop)}</text><text x="100" y="118" text-anchor="middle">${esc(centerBottom)}</text></svg>`;
+}
+document.addEventListener('mousemove',e=>{
+  const tip=$('#tip'), el=e.target.closest&&e.target.closest('[data-tip]');
+  if(el){ tip.textContent=el.getAttribute('data-tip'); tip.style.display='block'; const w=tip.offsetWidth; tip.style.left=Math.min(window.innerWidth-w-8,e.clientX+12)+'px'; tip.style.top=(e.clientY+16)+'px'; }
+  else tip.style.display='none';
+});
+
+/* ---------- dropdown + calendar components ---------- */
+let DD = {}; const CAL = {};
+function dropdown(id, opts, value, onChange, {label='', icon=null, cls=''}={}){
+  DD[id]={onChange};
+  const cur = opts.find(o=>String(o.value)===String(value)) || opts[0] || {label:'—'};
+  return `<div class="dd ${icon?'':'plain'} ${cls}" data-dd="${id}">
+    <button type="button" class="dd-btn">${icon?`<span class="lead">${ic(icon,17)}</span>`:''}<span class="dd-lab">${label?`<small>${esc(label)}</small>`:''}<b>${esc(cur.label)}</b></span>${ic('chev',16)}</button>
+    <div class="dd-menu">${opts.map(o=>`<button type="button" class="dd-opt ${String(o.value)===String(value)?'on':''}" data-v="${esc(o.value)}">${o.dot?`<i style="background:${o.dot}"></i>`:''}<span>${esc(o.label)}${o.sub?`<small>${esc(o.sub)}</small>`:''}</span>${String(o.value)===String(value)?ic('check',15):''}</button>`).join('')}</div></div>`;
+}
+/* mode 'period': pick any day → the billing period containing it is selected.
+   mode 'month' : pick a month. */
+function calPicker(id,{meters=[],value,mode='period',onChange,label='',cls=''}){
+  const prev=CAL[id];
+  CAL[id]={meters,value,mode,onChange,view: prev&&prev.mode===mode&&prev.view ? prev.view : (mode==='month'?value.slice(0,4):ym(value))};
+  let text;
+  if(mode==='month') text=ymLabel(value);
+  else { const p=meters.length?periodAt(meters[0],value):null; text=p?periodLabel(p):fmtD(value,true); }
+  return `<div class="cal ${cls}" data-cal="${id}"><button type="button" class="dd-btn"><span class="lead">${ic('cal',17)}</span><span class="dd-lab"><small>${esc(label)}</small><b>${esc(text)}</b></span>${ic('chev',16)}</button><div class="cal-pop">${calBody(id)}</div></div>`;
+}
+function calBody(id){
+  const c=CAL[id], today=todayISO();
+  if(c.mode==='month'){
+    const y=c.view;
+    return `<div class="cal-head"><button class="cal-nav" data-cnav="-1">${ic('left',16)}</button><b>${y}</b><button class="cal-nav" data-cnav="1">${ic('right',16)}</button></div>
+      <div class="cal-months">${MONTHS.map((m,i)=>{const k=`${y}-${String(i+1).padStart(2,'0')}`; return `<button class="cal-m ${k===c.value?'on':''} ${k===ym(today)?'today':''}" data-cv="${k}">${m}</button>`;}).join('')}</div>
+      <div class="cal-foot"><button class="chip" data-cv="${ym(today)}">This month</button><button class="chip" data-cv="${ymAdd(ym(today),-1)}">Last month</button></div>`;
+  }
+  const [vy,vm]=c.view.split('-').map(Number);
+  const first=new Date(vy,vm-1,1), lead=(first.getDay()+6)%7, start=new Date(vy,vm-1,1-lead);
+  const sel = c.meters.length ? periodAt(c.meters[0],c.value) : null;
+  const starts = new Set(S.periods.filter(p=>c.meters.includes(p.meter)).map(p=>p.from));
+  let cells='';
+  for(let i=0;i<42;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i); const s=isoD(d);
+    const cl=['cal-d']; if(d.getMonth()!==vm-1) cl.push('out');
+    if(sel && s>=sel.from && s<=sel.to){ cl.push('rng'); if(s===sel.from||d.getDay()===1) cl.push('rs'); if(s===sel.to||d.getDay()===0) cl.push('re'); if(s===sel.from||s===sel.to) cl.push('end'); }
+    if(s===today) cl.push('today'); if(starts.has(s)) cl.push('dot');
+    cells+=`<button class="${cl.join(' ')}" data-cv="${s}"><span>${d.getDate()}</span></button>`;
+  }
+  const latest = c.meters.length ? defaultDate(c.meters) : today;
+  const lp = c.meters.length ? latestPeriod(c.meters[0]) : null;
+  return `<div class="cal-head"><button class="cal-nav" data-cnav="-1">${ic('left',16)}</button><b>${MONTHS_L[vm-1]} ${vy}</b><button class="cal-nav" data-cnav="1">${ic('right',16)}</button></div>
+    <div class="cal-grid">${['M','T','W','T','F','S','S'].map((w,i)=>`<div class="cal-wd ${i===6?'sun':''}">${w}</div>`).join('')}${cells}</div>
+    <div class="cal-note">Pick any day — the billing period containing it is selected. Dots mark period start dates.</div>
+    <div class="cal-foot"><button class="chip" data-cv="${latest}">Latest billed</button>${lp?`<button class="chip" data-cv="${lp.from}">Open period</button>`:''}<button class="chip" data-cv="${today}">Today</button></div>`;
+}
+function closePops(){ document.querySelectorAll('.dd.open,.cal.open').forEach(el=>el.classList.remove('open')); }
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const nav=t.closest('[data-cnav]');
+  if(nav){ const cal=nav.closest('.cal'), c=CAL[cal.dataset.cal], dir=Number(nav.dataset.cnav);
+    c.view = c.mode==='month' ? String(Number(c.view)+dir) : ymAdd(c.view,dir);
+    cal.querySelector('.cal-pop').innerHTML=calBody(cal.dataset.cal); return; }
+  const cv=t.closest('[data-cv]');
+  if(cv){ const id=cv.closest('.cal').dataset.cal, c=CAL[id]; closePops(); delete CAL[id]; c.onChange(cv.dataset.cv); return; }
+  const opt=t.closest('.dd-opt');
+  if(opt){ const dd=opt.closest('.dd'); closePops(); DD[dd.dataset.dd].onChange(opt.dataset.v); return; }
+  const btn=t.closest('.dd-btn');
+  if(btn){ const box=btn.closest('.dd,.cal'); const was=box.classList.contains('open'); closePops(); if(!was) box.classList.add('open'); return; }
+  if(!t.closest('.dd-menu,.cal-pop')) closePops();
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closePops(); closeModal(); } });
+
+/* ---------- shell: sidebar, theme, routing ---------- */
+const TABS = [
+  {id:'dashboard', label:'Dashboard',        icon:'grid'},
+  {id:'electric',  label:'Electric billing', icon:'zap'},
+  {id:'rent',      label:'Rent',             icon:'home'},
+  {id:'reports',   label:'Reports',          icon:'file'},
+  {id:'settings',  label:'Settings',         icon:'gear', sep:true},
+];
+const UI = {
+  tab: pref('tab') || 'dashboard',
+  dash:{date:null, meter:'all', tenant:'all'},
+  bill:{meter:null, periodId:null},
+  rentMonth: ym(todayISO()),
+  rep:{tab:null, date:null, month:ym(todayISO()), histTenant:null, stTenant:null, stDate:null},
+  set:{open:{meters:true,tenants:true,rules:false,data:false}, meterDraft:null, tenantDraft:null},
+};
+const isMobile = ()=> window.matchMedia('(max-width:900px)').matches;
+function toggleSidebar(){ if(isMobile()) toggleDrawer(); else { const l=$('#layout'); l.classList.toggle('collapsed'); pref('collapsed', l.classList.contains('collapsed')?'1':'0'); } }
+function toggleDrawer(force){ const l=$('#layout'); l.classList.toggle('drawer', force===undefined ? !l.classList.contains('drawer') : force); }
+const isDark = ()=> document.documentElement.dataset.theme ? document.documentElement.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+function toggleTheme(){ document.documentElement.dataset.theme = isDark()?'light':'dark'; pref('theme',document.documentElement.dataset.theme); render(); }
+function setTab(t){ UI.tab=t; pref('tab',t); toggleDrawer(false); render(); window.scrollTo(0,0); }
+function shell(){
+  $('#nav').innerHTML = TABS.map(t=>`${t.sep?'<div class="nav-sep"></div>':''}<a class="${UI.tab===t.id?'on':''}" onclick="setTab('${t.id}')" title="${t.label}">${ic(t.icon,20)}<span>${t.label}</span></a>`).join('');
+  const drafts = S.meters.map(m=>latestPeriod(m.id)).filter(p=>p && !cc(p).ready);
+  $('#side-foot').innerHTML = drafts.length
+    ? `<div class="k">Next to enter</div><div class="v">${drafts.length} meter reading${drafts.length>1?'s':''}</div><div class="k" style="margin-top:4px">${periodLabel(drafts[0])}</div><button onclick="openPeriod('${drafts[0].id}')">Enter readings</button>`
+    : `<div class="k">All caught up</div><div class="v">Readings complete</div>`;
+  $('#top-title').textContent = TABS.find(t=>t.id===UI.tab)?.label || '';
+  const n=new Date(); $('#top-date').innerHTML = `${ic('cal',16)}<span>${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][n.getDay()]}, ${fmtD(todayISO(),true)}</span>`;
+  $('#menu-btn').innerHTML = ic('menu',19);
+  $('#theme-btn').innerHTML = ic(isDark()?'sun':'moon',18);
+}
+function render(){
+  CC.clear(); DD={};
+  if(!TABS.some(t=>t.id===UI.tab)) UI.tab='dashboard';
+  shell();
+  $('#app').innerHTML = ({dashboard:viewDashboard, electric:viewElectric, rent:viewRent, reports:viewReports, settings:viewSettings})[UI.tab]();
+  (afterRender[UI.tab]||(()=>{}))();
+}
+const afterRender = {};
+
+/* ---------- shared actions ---------- */
+function markE(pid,tid){ const p=S.periods.find(x=>x.id===pid); p.paid[tid]=todayISO(); save(); toast(`${tenant(tid).name} marked paid`); render(); }
+function msgE(pid,tid){ const p=S.periods.find(x=>x.id===pid); copyText(electricMsg(p,compute(p).rows.find(r=>r.t.id===tid))); }
+function markR(mk,key){ setRentPaid(mk,key,todayISO()); toast('Rent marked paid'); render(); }
+function msgR(mk,key){ copyText(rentMsg(rentDues(mk).find(d=>d.key===key))); }
+function openPeriod(id){ const p=S.periods.find(x=>x.id===id); UI.bill.meter=p.meter; UI.bill.periodId=id; setTab('electric'); }
+function meterOpts(all=true){ return [...(all?[{value:'all',label:'All meters'}]:[]), ...S.meters.map(m=>({value:m.id,label:m.name,sub:m.floor,dot:mColor(m)}))]; }
+function avatar(t,s=32){ return `<span class="av" style="background:${tColor(t)};width:${s}px;height:${s}px">${initials(t.name)}</span>`; }
+
+/* ======================= DASHBOARD ======================= */
+function dashScope(){
+  if(UI.dash.meter!=='all' && !meterById(UI.dash.meter)) UI.dash.meter='all';
+  const meters = UI.dash.meter==='all' ? S.meters : S.meters.filter(m=>m.id===UI.dash.meter);
+  const mids = meters.map(m=>m.id);
+  if(UI.dash.tenant!=='all'){ const t=tenant(UI.dash.tenant); if(!t||!mids.includes(t.meter)) UI.dash.tenant='all'; }
+  const tf=UI.dash.tenant;
+  const date = UI.dash.date || defaultDate(mids);
+  const periods = mids.map(id=>periodAt(id,date)).filter(Boolean);
+  const from = periods.length ? periods.map(p=>p.from).sort()[0] : date;
+  const to = periods.length ? periods.map(p=>p.to).sort().slice(-1)[0] : date;
+  const rows = periods.flatMap(p=>cc(p).rows.filter(r=>tf==='all'||r.t.id===tf).map(r=>({...r,p,pReady:cc(p).ready})));
+  const dues = rentDuesRange(from,to).filter(d=>mids.includes(d.t.meter)&&(tf==='all'||d.t.id===tf));
+  const prevPeriods = periods.map(p=>{ const l=meterPeriods(p.meter); return l[l.indexOf(p)-1]; }).filter(Boolean);
+  const prevRows = prevPeriods.flatMap(p=>cc(p).rows.filter(r=>tf==='all'||r.t.id===tf));
+  return {meters,mids,tf,date,periods,from,to,rows,dues,prevRows};
+}
+function viewDashboard(){
+  const D = dashScope();
+  const kwh = sum(D.rows,r=>r.kind==='submeter'?r.kwh:0), prevKwh = sum(D.prevRows,r=>r.kind==='submeter'?r.kwh:0);
+  const elec = sum(D.rows,r=>r.pReady?r.total:0), elecPaid = sum(D.rows,r=>r.pReady&&r.paid?r.total:0);
+  const rentExp = sum(D.dues,d=>d.amount), rentPaid = sum(D.dues,d=>d.paid?d.amount:0);
+  const outstanding = (elec-elecPaid)+(rentExp-rentPaid);
+  const allReady = D.periods.length && D.periods.every(p=>cc(p).ready);
+  const delta = prevKwh ? Math.round((kwh-prevKwh)/prevKwh*100) : null;
+  const tSel = D.tf==='all'?null:tenant(D.tf);
+  const tenantOpts = [{value:'all',label:'All tenants'}, ...liveTenants().filter(t=>D.mids.includes(t.meter)).map(t=>({value:t.id,label:t.name,sub:meterById(t.meter)?.name,dot:tColor(t)}))];
+
+  const maxFrom = D.periods.length ? D.periods.map(p=>p.from).sort().slice(-1)[0] : D.date;
+  const keys = [...new Set(S.periods.filter(p=>D.mids.includes(p.meter)&&p.from<=maxFrom).map(p=>p.from))].sort().slice(-12);
+  const labels = keys.map(shortPeriod);
+  const kwhAt = (mid,k,tid)=>{ const p=S.periods.find(x=>x.meter===mid&&x.from===k); if(!p) return null; const rows=cc(p).rows.filter(r=>r.kind==='submeter'&&r.kwh!=null&&(!tid||r.t.id===tid)); return rows.length?rd(sum(rows,r=>r.kwh),1):null; };
+  const lineSeries = tSel
+    ? [{name:tSel.name,color:'var(--accent)',values:keys.map(k=>kwhAt(tSel.meter,k,tSel.id))}]
+    : D.meters.map(m=>({name:m.name,color:mColor(m),values:keys.map(k=>kwhAt(m.id,k))}));
+  const elecSeries = keys.map(k=>{ let s=0; D.mids.forEach(mid=>{ const p=S.periods.find(x=>x.meter===mid&&x.from===k); if(p&&cc(p).ready) s+=sum(cc(p).rows.filter(r=>!tSel||r.t.id===tSel.id),r=>r.total); }); return s; });
+  const rentSeries = keys.map(k=>{ const ps=D.mids.map(mid=>S.periods.find(x=>x.meter===mid&&x.from===k)).filter(Boolean); if(!ps.length) return 0; const f=ps.map(p=>p.from).sort()[0], t=ps.map(p=>p.to).sort().slice(-1)[0]; return sum(rentDuesRange(f,t).filter(d=>D.mids.includes(d.t.meter)&&(!tSel||d.t.id===tSel.id)),d=>d.amount); });
+
+  let donutItems;
+  if(tSel){ const r=D.rows[0]; const others = sum(D.periods.flatMap(p=>cc(p).rows).filter(x=>x.t.id!==tSel.id),x=>x.total);
+    donutItems=[{label:tSel.name,value:r&&r.total||0,color:'var(--accent)'},{label:'Others on '+(meterById(tSel.meter)?.name||''),value:others,color:'var(--yellow)'}]; }
+  else donutItems = D.rows.filter(r=>r.total).map(r=>({label:r.t.name,value:r.total,color:tColor(r.t)})).sort((a,b)=>b.value-a.value);
+
+  const queue = [
+    ...allUnpaidElectric().filter(x=>D.mids.includes(x.p.meter)&&(D.tf==='all'||x.r.t.id===D.tf)).map(x=>({type:'e',t:x.r.t,what:`Electric · ${meterById(x.p.meter)?.name} · ${periodLabel(x.p)}`,amt:x.r.total,act:`markE('${x.p.id}','${x.r.t.id}')`,msg:`msgE('${x.p.id}','${x.r.t.id}')`})),
+    ...rentOpenToDate().filter(d=>D.mids.includes(d.t.meter)&&(D.tf==='all'||d.t.id===D.tf)).map(d=>({type:'r',t:d.t,what:`Rent${d.part?' ('+d.part+')':''} · due ${fmtD(d.date,true)}`,amt:d.amount,status:rentStatus(d),act:`markR('${d.month}','${d.key}')`,msg:`msgR('${d.month}','${d.key}')`})),
+  ];
+
+  const tIds = [...new Set([...D.rows.map(r=>r.t.id), ...D.dues.map(d=>d.t.id)])];
+  const breakdown = tIds.map(id=>({t:tenant(id), r:D.rows.find(r=>r.t.id===id), dues:D.dues.filter(d=>d.t.id===id)})).sort((a,b)=>S.tenants.indexOf(a.t)-S.tenants.indexOf(b.t));
+  const avg12 = keys.length ? sum(keys,(k,i)=>sum(lineSeries,s=>s.values[i]))/keys.length : 0;
+
+  if(!S.meters.length) return `<div class="page-head"><div><h1>Welcome</h1><p class="sub">No data yet.</p></div></div>
+    <div class="card"><h2>Load your spreadsheet data</h2><p class="muted">Go to <b>Settings → Data &amp; backup → Import backup</b> and choose <b>house-bills-initial.json</b> (in your Prototype folder). It holds your meters, tenants and all readings from Meralco_Computation.xlsx. Or add meters and tenants by hand in Settings.</p>
+    <button class="btn primary" onclick="UI.set.open.data=true;setTab('settings')">Open Settings</button></div>`;
+  return `
+  <div class="page-head">
+    <div><h1>Dashboard</h1><p class="sub">${D.periods.length? `Billing period ${periodLabel(D.periods[0])}` : 'No billing period on that date'}${tSel?` · ${esc(tSel.name)}`:''}</p></div>
+    <div class="filters">
+      ${calPicker('dash-cal',{meters:D.mids,value:D.date,label:'Billing period',onChange:v=>{UI.dash.date=v;render();}})}
+      ${dropdown('dash-meter',meterOpts(),UI.dash.meter,v=>{UI.dash.meter=v;render();},{label:'Meter',icon:'gauge'})}
+      ${dropdown('dash-tenant',tenantOpts,UI.dash.tenant,v=>{UI.dash.tenant=v;render();},{label:'Tenant',icon:'user',cls:'right'})}
+    </div>
+  </div>
+
+  <div class="grid g4">
+    <div class="card kpi"><div class="ico">${ic('zap',24)}</div><div><div class="v num">${kwhF(kwh)} <span style="font-size:14px;font-weight:500">kWh</span></div><div class="l">Consumed (submeters)</div>
+      <div class="h">${delta==null?'&nbsp;':`<span class="${delta>0?'up':'down'}">${delta>0?'▲':'▼'} ${Math.abs(delta)}%</span> vs previous period`}</div></div></div>
+    <div class="card kpi"><div class="ico y">${ic('receipt',24)}</div><div><div class="v num">${allReady||elec?peso(elec):'—'}</div><div class="l">Electric amount</div>
+      <div class="h">${allReady? `${peso(elecPaid)} collected` : 'Waiting for readings'}</div></div></div>
+    <div class="card kpi"><div class="ico n">${ic('home',24)}</div><div><div class="v num">${peso(rentExp)}</div><div class="l">Rent amount</div>
+      <div class="h">${D.dues.length?`${peso(rentPaid)} collected · ${D.dues.length} due date${D.dues.length>1?'s':''}`:'No rent due in period'}</div></div></div>
+    <div class="card kpi"><div class="ico g">${ic('wallet',24)}</div><div><div class="v num">${peso(outstanding)}</div><div class="l">Outstanding</div>
+      <div class="h">electric + rent in this period</div></div></div>
+  </div>
+
+  <div class="grid g-main mt">
+    <div class="card">
+      <div class="card-h"><h2>Consumption statistic</h2><div class="legend">${lineSeries.map(s=>`<span style="color:${s.color}"><i></i><span class="muted">${esc(s.name)}</span></span>`).join('')}</div></div>
+      <div class="stat-mini"><div><small>This period</small><b class="num">${kwhF(kwh)} kWh</b></div><div><small>Previous</small><b class="num">${kwhF(prevKwh)} kWh</b></div><div><small>12-period average</small><b class="num">${kwhF(avg12)} kWh</b></div></div>
+      ${lineChart(lineSeries,labels,{fmt:v=>kwhF(v)+' kWh',axis:v=>Math.round(v)})}
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>${tSel?'Share of meter bill':'Electric share'}</h2><span class="muted small">${D.periods[0]?shortPeriod(D.periods[0].from):''}</span></div>
+      <div class="donut-wrap">${donut(donutItems, peso(sum(donutItems,i=>i.value)), 'total')}
+        <div class="donut-legend">${donutItems.slice(0,7).map(i=>`<div><i style="background:${i.color}"></i><span>${esc(i.label)}</span><b class="num">${peso(i.value)}</b></div>`).join('')}</div></div>
+    </div>
+  </div>
+
+  <div class="grid g-main mt">
+    <div class="card">
+      <div class="card-h"><h2>Electric vs rent</h2><div class="legend"><span style="color:var(--accent)"><i></i><span class="muted">Electric</span></span><span style="color:var(--yellow)"><i></i><span class="muted">Rent</span></span></div></div>
+      <div class="stat-mini"><div><small>Electric (12 periods)</small><b class="num">${peso(sum(elecSeries))}</b></div><div><small>Rent (12 periods)</small><b class="num">${peso(sum(rentSeries))}</b></div></div>
+      ${groupBars([{name:'Electric',color:'var(--accent)',values:elecSeries},{name:'Rent',color:'var(--yellow)',values:rentSeries}],labels,{fmt:v=>peso(v),axis:v=>v>=1000?(v/1000)+'k':v})}
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>To collect</h2><span class="muted small">${queue.length} · ${peso(sum(queue,q=>q.amt))}</span></div>
+      <div class="list">${queue.length? queue.slice(0,7).map(q=>`
+        <div class="item"><div class="tile ${q.type}">${ic(q.type==='e'?'zap':'home',18)}</div>
+          <div class="grow"><div class="t">${esc(q.t.name)} ${q.status?`<span class="pill ${q.status.cls}">${q.status.txt}</span>`:''}</div><div class="s">${esc(q.what)}</div></div>
+          <div class="acts"><b class="strong num">${peso(q.amt)}</b><button class="icon-btn sm" title="Copy reminder" onclick="${q.msg}">${ic('copy',15)}</button><button class="icon-btn sm" title="Mark paid" onclick="${q.act}">${ic('check',16)}</button></div></div>`).join('')
+        + (queue.length>7?`<div class="muted small" style="padding-top:10px">+ ${queue.length-7} more — filter by meter or tenant to see them</div>`:'') : '<div class="empty">Nothing to collect 🎉</div>'}</div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <div class="card-h"><h2>Tenants this period</h2><span class="muted small">${breakdown.length} tenant${breakdown.length===1?'':'s'}</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Tenant</th><th>Meter</th><th class="n">Reading</th><th class="n">kWh</th><th class="n">Electric</th><th class="n">Rent</th><th>Electric status</th><th>Rent status</th><th></th></tr></thead>
+      <tbody>${breakdown.map(({t,r,dues})=>{ const rentAmt=sum(dues,d=>d.amount), rentOpen=dues.filter(d=>!d.paid);
+        return `<tr><td><div class="who">${avatar(t)}<span class="strong">${esc(t.name)}</span></div></td><td class="muted">${esc(meterById(t.meter)?.name||'')}</td>
+        <td class="n muted">${r&&r.kind==='submeter'?`${kwhF(r.prev)} → ${r.curr==null?'?':kwhF(r.curr)}`:r?'no submeter':''}</td><td class="n">${r?kwhF(r.kwh):'—'}</td>
+        <td class="n strong">${r&&r.pReady?peso(r.total):'—'}</td><td class="n">${rentAmt?peso(rentAmt):'—'}</td>
+        <td>${!r?'':!r.pReady?'<span class="pill mute">Pending</span>':r.paid?'<span class="pill ok">Paid</span>':'<span class="pill warn">Unpaid</span>'}</td>
+        <td>${!dues.length?'':rentOpen.length? `<span class="pill ${rentStatus(rentOpen[0]).cls}">${rentStatus(rentOpen[0]).txt}</span>` : `<span class="pill ${dues.every(d=>d.assumed)?'mute':'ok'}">${dues.every(d=>d.assumed)?'Before tracking':'Paid'}</span>`}</td>
+        <td class="n"><button class="btn sm ghost" onclick="openStatement('${t.id}','${(r&&r.p.from)||D.date}')">${ic('image',15)} Statement</button></td></tr>`; }).join('') || '<tr><td colspan="9" class="empty">No tenants in this selection</td></tr>'}
+      </tbody></table></div>
+  </div>`;
+}
+
+/* ======================= ELECTRIC BILLING ======================= */
+function viewElectric(){
+  if(!meterById(UI.bill.meter)) UI.bill.meter = S.meters[0]?.id;
+  if(!UI.bill.meter) return `<div class="page-head"><h1>Electric billing</h1></div><div class="card empty">Add a meter first in Settings → Meter setup.</div>`;
+  const list = meterPeriods(UI.bill.meter);
+  let p = list.find(x=>x.id===UI.bill.periodId) || list[list.length-1];
+  const m = meterById(UI.bill.meter);
+  const head = (extra='')=>`<div class="page-head"><div><h1>Electric billing</h1><p class="sub">Enter the Meralco bill and each submeter reading — amounts compute automatically.</p></div>
+    <div class="filters">${dropdown('bill-meter',meterOpts(false),UI.bill.meter,v=>{UI.bill.meter=v;UI.bill.periodId=null;render();},{label:'Meter',icon:'gauge'})}${extra}</div></div>`;
+  if(!p) return head(`<button class="btn primary" onclick="newPeriod()">${ic('plus',16)} Start first period</button>`)+`<div class="card empty">No billing periods for ${esc(m.name)} yet.</div>`;
+  UI.bill.periodId=p.id; syncTenantsIntoLatest(p); CC.delete(p);
+  const c=cc(p), idx=list.indexOf(p), isLatest=idx===list.length-1;
+  const sub=c.rows.filter(r=>r.kind==='submeter'), rem=c.rows.filter(r=>r.kind==='remainder');
+  const rowHtml = r => `<tr>
+    <td><div class="who">${avatar(r.t)}<div><div class="strong">${esc(r.t.name)}</div>${r.t.min?`<div class="muted small">min ${peso(r.t.min)}</div>`:''}</div></div></td>
+    ${r.kind==='submeter'
+      ? `<td class="n"><input class="cell" type="number" step="0.1" value="${r.prev??''}" data-f="prev" data-t="${r.t.id}"></td>
+         <td class="n"><input class="cell ${r.curr==null?'need':''}" type="number" step="0.1" value="${r.curr??''}" placeholder="enter" data-f="curr" data-t="${r.t.id}"></td>
+         <td class="n">${kwhF(r.kwh)}</td>`
+      : `<td colspan="2" class="muted small">No submeter — pays the rest of the bill${rem.length>1?' (split)':''}</td><td class="n muted">${r.kwh!=null?'≈ '+kwhF(r.kwh):'—'}</td>`}
+    <td class="n">${peso(r.raw)}</td>
+    <td class="n">${r.minAdj?`<span class="pill info">+${peso(r.minAdj)}</span> `:''}<input class="cell" style="width:76px" type="number" step="1" value="${p.adj[r.t.id]??''}" placeholder="±0" data-f="adj" data-t="${r.t.id}"></td>
+    <td class="n strong">${r.total==null?'<span class="pill mute">Pending</span>':peso(r.total)}</td>
+    <td>${r.ready&&c.ready?`<label class="check"><input type="checkbox" ${r.paid?'checked':''} data-f="paid" data-t="${r.t.id}"> <span class="small ${r.paid?'muted':''}">${r.paid?fmtD(r.paid):'Unpaid'}</span></label>`:''}</td>
+    <td class="n">${r.ready&&c.ready?`<button class="icon-btn sm" title="Copy message" onclick="msgE('${p.id}','${r.t.id}')">${ic('copy',15)}</button> <button class="icon-btn sm" title="Statement (JPEG)" onclick="openStatement('${r.t.id}','${p.from}')">${ic('image',15)}</button>`:''}</td></tr>`;
+  return head(`
+      <button class="icon-btn" ${idx<=0?'disabled':''} title="Previous period" onclick="UI.bill.periodId='${list[idx-1]?.id}';render()">${ic('left',17)}</button>
+      ${calPicker('bill-cal',{meters:[UI.bill.meter],value:p.from,label:'Billing period',onChange:v=>{ const q=periodAt(UI.bill.meter,v); if(q){UI.bill.periodId=q.id;render();} else toast('No billing period on that date yet — use “New period”'); }})}
+      <button class="icon-btn" ${isLatest?'disabled':''} title="Next period" onclick="UI.bill.periodId='${list[idx+1]?.id}';render()">${ic('right',17)}</button>
+      <button class="btn primary" onclick="newPeriod()" ${isLatest&&!c.ready?'disabled title="Finish the open period first"':''}>${ic('plus',16)} New period</button>`) + `
+  <div class="card">
+    <div class="card-h"><div><h2>${esc(m.name)} meter · ${periodLabel(p)}</h2><div class="muted small">${esc(m.floor)} · bills start every ${ordinal(m.startDay)}</div></div>
+      ${c.ready?(c.outstanding?`<span class="pill warn">${peso(c.outstanding)} to collect</span>`:`<span class="pill ok">All collected</span>`):`<span class="pill info">Draft — ${[c.pending?c.pending+' reading(s) missing':'',p.bill==null?'bill missing':''].filter(Boolean).join(', ')}</span>`}</div>
+    <div class="fields">
+      <label class="f">Meralco bill (₱)<input type="number" step="0.01" value="${p.bill??''}" placeholder="from Meralco bill" data-p="bill" class="${p.bill==null?'need':''}"></label>
+      <label class="f">Rate (₱ per kWh)<input type="number" step="0.01" value="${p.rate??''}" data-p="rate"></label>
+      <label class="f">Main meter previous<input type="number" step="1" value="${p.mainPrev??''}" placeholder="optional" data-p="mainPrev"></label>
+      <label class="f">Main meter current<input type="number" step="1" value="${p.mainCurr??''}" placeholder="optional" data-p="mainCurr"></label>
+    </div>
+    ${c.suggestedRate?`<div class="note" style="margin-top:14px">Bill ÷ main-meter kWh = <b>${peso(c.suggestedRate,2)}/kWh</b> (${kwhF(c.mainKwh)} kWh) <button class="btn sm" style="margin-left:8px" onclick="applyRate(${c.suggestedRate})">Use this rate</button></div>`:''}
+  </div>
+  <div class="card mt">
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Tenant</th><th class="n">Previous</th><th class="n">Current</th><th class="n">kWh</th><th class="n">Amount</th><th class="n">Adjustment</th><th class="n">Total due</th><th>Paid</th><th></th></tr></thead>
+      <tbody><tr class="group"><td colspan="9">With submeter</td></tr>${sub.map(rowHtml).join('')}
+      <tr class="group"><td colspan="9">No submeter</td></tr>${rem.length?rem.map(rowHtml).join(''):`<tr><td colspan="9" class="muted small">No “pays remainder” tenant on this meter — set one in Settings → Tenants setup.</td></tr>`}</tbody>
+    </table></div>
+    <div class="summary">
+      <div class="box"><div class="l">Submetered total</div><div class="v num">${peso(c.subRaw)}</div><div class="small muted">${kwhF(c.subKwh)} kWh</div></div>
+      <div class="box"><div class="l">Remainder (no submeter)</div><div class="v num">${peso(c.remainder)}</div><div class="small muted">bill − submetered</div></div>
+      <div class="box"><div class="l">Over / (under) bill</div><div class="v num" style="color:${c.surplus>0?'var(--green)':c.surplus<0?'var(--red)':'inherit'}">${c.surplus==null?'—':peso(c.surplus,2)}</div><div class="small muted">from minimums &amp; adjustments</div></div>
+      <div class="box"><div class="l">Collected</div><div class="v num">${peso(c.collected)}</div><div class="small muted">${c.ready?peso(c.outstanding)+' outstanding':'&nbsp;'}</div></div>
+      <div class="box dark"><div class="l">Total to collect</div><div class="v num">${c.ready?peso(c.totalDue):'—'}</div><div class="small" style="opacity:.7">bill ${peso(p.bill,2)}</div></div>
+    </div>
+    <div class="row" style="margin-top:16px;align-items:flex-end">
+      <label class="f" style="flex:1;min-width:220px">Notes<input type="text" value="${esc(p.note||'')}" placeholder="e.g. meter not moving, revisit" data-p="note"></label>
+      ${c.ready?`<button class="btn" onclick="markAllPaid('${p.id}')">${ic('check',16)} Mark all paid</button><button class="btn" onclick="copyAll('${p.id}')">${ic('copy',16)} Copy all messages</button>`:''}
+      ${isLatest?`<button class="btn danger" onclick="deletePeriod('${p.id}')">${ic('trash',16)} Delete period</button>`:''}
+    </div>
+  </div>`;
+}
+afterRender.electric = ()=>{
+  const p=S.periods.find(x=>x.id===UI.bill.periodId); if(!p) return; const app=$('#app');
+  app.querySelectorAll('[data-p]').forEach(el=>el.addEventListener('change',()=>{ const f=el.dataset.p; p[f] = f==='note'?el.value:(el.value===''?null:Number(el.value)); save(); render(); }));
+  app.querySelectorAll('[data-f]').forEach(el=>{ const f=el.dataset.f, tid=el.dataset.t;
+    el.addEventListener('change',()=>{
+      if(f==='paid'){ if(el.checked) p.paid[tid]=todayISO(); else delete p.paid[tid]; }
+      else if(f==='adj'){ if(el.value===''||Number(el.value)===0) delete p.adj[tid]; else p.adj[tid]=Number(el.value); }
+      else { p.readings[tid][f]=el.value===''?null:Number(el.value); const r=p.readings[tid]; if(r.curr!=null&&r.prev!=null&&r.curr<r.prev) toast('Heads up: current is lower than previous'); }
+      save(); render();
+      if(f==='curr'){ const next=[...$('#app').querySelectorAll('input[data-f="curr"]')].find(i=>i.value===''); if(next) next.focus(); }
+    }); });
+};
+function applyRate(r){ const p=S.periods.find(x=>x.id===UI.bill.periodId); p.rate=r; save(); render(); }
+function newPeriod(){ const np=newPeriodFrom(UI.bill.meter,latestPeriod(UI.bill.meter)); if(S.periods.some(x=>x.id===np.id)){toast('That period already exists');return;} S.periods.push(np); UI.bill.periodId=np.id; save(); render(); toast('New period started — enter current readings'); }
+function deletePeriod(id){ if(!confirm('Delete this billing period? This cannot be undone.')) return; S.periods=S.periods.filter(x=>x.id!==id); UI.bill.periodId=null; save(); render(); }
+function markAllPaid(id){ const p=S.periods.find(x=>x.id===id); compute(p).rows.forEach(r=>{ if(r.ready&&!r.paid) p.paid[r.t.id]=todayISO(); }); save(); render(); toast('All marked paid'); }
+function copyAll(id){ const p=S.periods.find(x=>x.id===id); copyText(compute(p).rows.filter(r=>r.ready).map(r=>electricMsg(p,r)).join('\n\n— — —\n\n')); }
+
+/* ======================= RENT ======================= */
+function viewRent(){
+  const k=UI.rentMonth, dues=rentDues(k);
+  const exp=sum(dues,d=>d.amount), got=sum(dues,d=>d.paid?d.amount:0), overdue=dues.filter(d=>!d.paid&&d.date<todayISO());
+  return `
+  <div class="page-head"><div><h1>Rent</h1><p class="sub">Monthly rent roll — mark each payment as it comes in.</p></div>
+    <div class="filters"><button class="icon-btn" onclick="UI.rentMonth=ymAdd(UI.rentMonth,-1);render()">${ic('left',17)}</button>
+      ${calPicker('rent-cal',{mode:'month',value:k,label:'Month',onChange:v=>{UI.rentMonth=v;render();},cls:'right'})}
+      <button class="icon-btn" onclick="UI.rentMonth=ymAdd(UI.rentMonth,1);render()">${ic('right',17)}</button></div></div>
+  <div class="grid g4">
+    <div class="card kpi"><div class="ico n">${ic('home',24)}</div><div><div class="v num">${peso(exp)}</div><div class="l">Expected</div></div></div>
+    <div class="card kpi"><div class="ico g">${ic('check',24)}</div><div><div class="v num">${peso(got)}</div><div class="l">Collected</div></div></div>
+    <div class="card kpi"><div class="ico y">${ic('wallet',24)}</div><div><div class="v num">${peso(exp-got)}</div><div class="l">Remaining</div></div></div>
+    <div class="card kpi"><div class="ico">${ic('alert',24)}</div><div><div class="v num">${overdue.length}</div><div class="l">Overdue</div></div></div>
+  </div>
+  <div class="card mt">
+    <div class="card-h"><h2>${ymLabel(k)}</h2><div style="flex:1;max-width:260px" class="bar"><i style="width:${exp?got/exp*100:0}%"></i></div></div>
+    ${k<S.rentStart?`<div class="note soft" style="margin-bottom:12px">Rent tracking in this app starts ${ymLabel(S.rentStart)}. Earlier months show as “Before tracking”.</div>`:''}
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Due date</th><th>Tenant</th><th class="n">Amount</th><th>Status</th><th>Paid on</th><th></th></tr></thead>
+      <tbody>${dues.map(d=>{ const s=rentStatus(d); return `<tr>
+        <td>${fmtD(d.date)}</td><td><div class="who">${avatar(d.t)}<div><div class="strong">${esc(d.t.name)}</div>${d.part?`<div class="muted small">${d.part}</div>`:''}</div></div></td>
+        <td class="n strong">${peso(d.amount)}</td><td><span class="pill ${s.cls}">${s.txt}</span></td>
+        <td>${d.paid&&!d.assumed?`<input type="date" value="${d.paid}" onchange="setRentPaid('${k}','${d.key}',this.value||null);render()">`:''}</td>
+        <td class="n">${d.paid&&!d.assumed?`<button class="btn sm ghost" onclick="setRentPaid('${k}','${d.key}',null);render()">Undo</button>`
+          :`<button class="icon-btn sm" title="Copy reminder" onclick="msgR('${k}','${d.key}')">${ic('copy',15)}</button> <button class="btn sm primary" onclick="markR('${k}','${d.key}')">Mark paid</button>`}</td></tr>`; }).join('') || '<tr><td colspan="6" class="empty">No rent set up — add rent in Settings → Tenants setup.</td></tr>'}</tbody>
+      <tfoot><tr class="total"><td colspan="2">Total</td><td class="n">${peso(exp)}</td><td colspan="3"></td></tr></tfoot>
+    </table></div>
+    <p class="muted small" style="margin:12px 0 0">Tenants with two due dates (e.g. 10th &amp; 25th) are split into equal halves.</p>
+  </div>`;
+}
+
+/* ======================= REPORTS ======================= */
+function viewReports(){
+  const tabs=[...S.meters.map(m=>({id:m.id,label:`${m.name} meter`})),{id:'rent',label:'Rent'},{id:'statements',label:'Tenant statements'}];
+  if(!tabs.some(t=>t.id===UI.rep.tab)) UI.rep.tab=tabs[0].id;
+  const body = UI.rep.tab==='rent' ? repRent() : UI.rep.tab==='statements' ? repStatements() : repMeter(UI.rep.tab);
+  return `<div class="page-head"><div><h1>Reports</h1><p class="sub">Billing report per meter, rent report (PDF) and tenant statements (JPEG).</p></div></div>
+    <div class="seg" style="margin-bottom:20px">${tabs.map(t=>`<button class="${t.id===UI.rep.tab?'on':''}" onclick="UI.rep.tab='${t.id}';render()">${esc(t.label)}</button>`).join('')}</div>${body}`;
+}
+function repMeter(mid){
+  const m=meterById(mid);
+  const date = UI.rep.date && periodAt(mid,UI.rep.date) ? UI.rep.date : defaultDate([mid]);
+  const p=periodAt(mid,date);
+  if(!p) return `<div class="card empty">No billing periods for ${esc(m.name)} yet.</div>`;
+  const c=cc(p), sub=c.rows.filter(r=>r.kind==='submeter'), rem=c.rows.filter(r=>r.kind==='remainder');
+  const tr=r=>`<tr><td>${esc(r.t.name)}</td><td class="n">${r.kind==='submeter'?kwhF(r.prev):''}</td><td class="n">${r.kind==='submeter'?kwhF(r.curr):''}</td><td class="n">${kwhF(r.kwh)}</td><td class="n">${peso(r.raw)}</td><td class="n">${(r.minAdj+r.manual)?peso(r.minAdj+r.manual):'—'}</td><td class="n strong">${peso(r.total)}</td><td>${r.paid?`<span class="pill ok">Paid ${fmtD(r.paid)}</span>`:r.ready&&c.ready?'<span class="pill warn">Unpaid</span>':'<span class="pill mute">Pending</span>'}</td><td class="n no-print">${r.ready?`<button class="icon-btn sm" title="Statement (JPEG)" onclick="openStatement('${r.t.id}','${p.from}')">${ic('image',15)}</button>`:''}</td></tr>`;
+  const hist=meterPeriods(mid).filter(x=>x.from<=p.from&&x.bill!=null).slice(-12);
+  const hTenants=liveTenants().filter(t=>t.meter===mid&&t.type==='submeter');
+  if(!hTenants.some(t=>t.id===UI.rep.histTenant)) UI.rep.histTenant=hTenants[0]?.id;
+  const ht=tenant(UI.rep.histTenant);
+  const tHist = ht ? meterPeriods(mid).filter(x=>x.from<=p.from).map(x=>({x,r:cc(x).rows.find(r=>r.t.id===ht.id)})).filter(o=>o.r&&o.r.kwh!=null).slice(-12) : [];
+  return `
+  <div class="card">
+    <div class="card-h"><div><h2>${esc(m.name)} meter report</h2><div class="muted small">${esc(m.floor)} · ${periodLabel(p)} · rate ${peso(p.rate,2)}/kWh</div></div>
+      <div class="filters no-print">${calPicker('rep-cal',{meters:[mid],value:p.from,label:'Billing period',onChange:v=>{UI.rep.date=v;render();},cls:'right'})}
+        <button class="btn" onclick="bulkStatements('${mid}','${p.from}')">${ic('image',16)} All statements</button>
+        <button class="btn primary" onclick="printEl('#rep-area','${esc(m.name)} meter · ${periodLabel(p)}')">${ic('download',16)} Export PDF</button></div></div>
+    <div id="rep-area">
+      <div class="tbl-wrap print-block"><table>
+        <thead><tr><th>Name</th><th class="n">Previous</th><th class="n">Current</th><th class="n">Consumed</th><th class="n">Amount</th><th class="n">Adjustment</th><th class="n">Total</th><th>Paid</th><th class="no-print"></th></tr></thead>
+        <tbody><tr class="group"><td colspan="9">With submeter</td></tr>${sub.map(tr).join('')}
+        <tr class="group"><td colspan="9">No submeter</td></tr>${rem.map(tr).join('')}
+        <tr class="total"><td>Total accumulated</td><td></td><td></td><td class="n">${kwhF(c.subKwh)}</td><td class="n">${peso(c.subRaw+(c.remainder||0))}</td><td></td><td class="n">${c.ready?peso(c.totalDue):'—'}</td><td></td><td class="no-print"></td></tr>
+        <tr class="bill"><td>Overall Meralco bill</td><td class="n">${p.mainPrev??''}</td><td class="n">${p.mainCurr??''}</td><td class="n">${kwhF(c.mainKwh)}</td><td></td><td></td><td class="n">${peso(p.bill,2)}</td><td></td><td class="no-print"></td></tr></tbody>
+      </table></div>
+      ${p.note?`<div class="note" style="margin-top:10px">Note: ${esc(p.note)}</div>`:''}
+      <div class="summary print-block">
+        <div class="box"><div class="l">Meralco bill</div><div class="v num">${peso(p.bill,2)}</div></div>
+        <div class="box"><div class="l">Total to collect</div><div class="v num">${c.ready?peso(c.totalDue):'—'}</div></div>
+        <div class="box"><div class="l">Collected</div><div class="v num">${peso(c.collected)}</div></div>
+        <div class="box dark"><div class="l">Outstanding</div><div class="v num">${peso(c.outstanding)}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><div class="card-h"><h2>Bill vs charged</h2><div class="legend"><span style="color:var(--accent)"><i></i><span class="muted">Meralco bill</span></span><span style="color:var(--yellow)"><i></i><span class="muted">Charged to tenants</span></span></div></div>
+      ${lineChart([{name:'Meralco bill',color:'var(--accent)',values:hist.map(x=>x.bill)},{name:'Charged',color:'var(--yellow)',values:hist.map(x=>cc(x).ready?cc(x).totalDue:null)}],hist.map(x=>shortPeriod(x.from)),{fmt:v=>peso(v),axis:v=>v>=1000?(v/1000)+'k':v,height:220})}</div>
+    <div class="card"><div class="card-h"><h2>Usage by tenant</h2>${ht?dropdown('rep-hist',hTenants.map(t=>({value:t.id,label:t.name,dot:tColor(t)})),ht.id,v=>{UI.rep.histTenant=v;render();},{cls:'right'}):''}</div>
+      ${tHist.length?groupBars([{name:'kWh',color:tColor(ht),values:tHist.map(o=>o.r.kwh)}],tHist.map(o=>shortPeriod(o.x.from)),{fmt:v=>kwhF(v)+' kWh',axis:v=>Math.round(v),height:220})+`<div class="stat-mini" style="margin-top:8px"><div><small>Average</small><b class="num">${kwhF(sum(tHist,o=>o.r.kwh)/tHist.length)} kWh</b></div><div><small>Average bill</small><b class="num">${peso(sum(tHist,o=>o.r.total)/tHist.length)}</b></div></div>`:'<div class="empty">No history</div>'}</div>
+  </div>`;
+}
+function repRent(){
+  const k=UI.rep.month, dues=rentDues(k), exp=sum(dues,d=>d.amount), got=sum(dues,d=>d.paid?d.amount:0);
+  const year=k.slice(0,4), months=MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,'0')}`);
+  const rentT=liveTenants().filter(t=>t.active&&t.rent>0&&t.due.length);
+  const cell=(t,mk)=>{ const ds=rentDues(mk).filter(d=>d.t.id===t.id); if(!ds.length) return '<td class="n muted">—</td>';
+    if(ds.every(d=>d.assumed)) return '<td class="n muted" title="Before tracking">·</td>';
+    if(ds.every(d=>d.paid)) return `<td class="n" style="color:var(--green);font-weight:600" title="Paid">✓</td>`;
+    if(ds.some(d=>!d.paid&&d.date<todayISO())) return `<td class="n" style="color:var(--red);font-weight:700" title="Overdue">!</td>`;
+    return '<td class="n muted" title="Upcoming">○</td>'; };
+  return `
+  <div class="card">
+    <div class="card-h"><div><h2>Rent collection report</h2><div class="muted small">${ymLabel(k)}</div></div>
+      <div class="filters no-print">${calPicker('rep-rent-cal',{mode:'month',value:k,label:'Month',onChange:v=>{UI.rep.month=v;render();},cls:'right'})}
+        <button class="btn primary" onclick="printEl('#rent-area','Rent collection · ${ymLabel(k)}')">${ic('download',16)} Export PDF</button></div></div>
+    <div id="rent-area">
+      <div class="summary print-block" style="margin-top:0;margin-bottom:16px">
+        <div class="box"><div class="l">Expected</div><div class="v num">${peso(exp)}</div></div>
+        <div class="box"><div class="l">Collected</div><div class="v num">${peso(got)}</div></div>
+        <div class="box"><div class="l">Remaining</div><div class="v num">${peso(exp-got)}</div></div>
+        <div class="box dark"><div class="l">Collection rate</div><div class="v num">${exp?Math.round(got/exp*100):0}%</div></div>
+      </div>
+      <div class="tbl-wrap print-block"><table>
+        <thead><tr><th>Due date</th><th>Tenant</th><th>Meter</th><th class="n">Amount</th><th>Status</th></tr></thead>
+        <tbody>${dues.map(d=>{const s=rentStatus(d);return `<tr><td>${fmtD(d.date,true)}</td><td class="strong">${esc(d.t.name)}${d.part?` <span class="muted small">(${d.part})</span>`:''}</td><td class="muted">${esc(meterById(d.t.meter)?.name||'')}</td><td class="n">${peso(d.amount)}</td><td><span class="pill ${s.cls}">${s.txt}</span></td></tr>`;}).join('')}</tbody>
+        <tfoot><tr class="total"><td colspan="3">Total</td><td class="n">${peso(exp)}</td><td></td></tr></tfoot></table></div>
+      <h2 style="margin:26px 0 8px">${year} overview</h2>
+      <div class="tbl-wrap print-block"><table>
+        <thead><tr><th>Tenant</th><th class="n">Monthly</th>${MONTHS.map(m=>`<th class="n">${m}</th>`).join('')}</tr></thead>
+        <tbody>${rentT.map(t=>`<tr><td class="strong">${esc(t.name)}</td><td class="n">${peso(t.rent)}</td>${months.map(mk=>cell(t,mk)).join('')}</tr>`).join('')}</tbody></table></div>
+      <p class="muted small">✓ paid · ! overdue · ○ upcoming · · before tracking (${ymLabel(S.rentStart)})</p>
+    </div>
+  </div>`;
+}
+function repStatements(){
+  const ts=liveTenants();
+  if(!ts.some(t=>t.id===UI.rep.stTenant)) UI.rep.stTenant=ts[0]?.id;
+  const t=tenant(UI.rep.stTenant); if(!t) return '<div class="card empty">No tenants yet.</div>';
+  const date = UI.rep.stDate && periodAt(t.meter,UI.rep.stDate) ? UI.rep.stDate : defaultDate([t.meter]);
+  UI.rep.stDate=date;
+  const p=periodAt(t.meter,date);
+  return `<div class="grid g2" style="grid-template-columns:minmax(0,1fr) minmax(0,420px);align-items:start">
+    <div class="card">
+      <h2 style="margin-bottom:6px">Tenant statement</h2>
+      <p class="muted small" style="margin-top:0">A one-page bill image (JPEG) for each tenant: electric for the billing period, rent due in that period and any earlier unpaid balance. Send it by Messenger or print it.</p>
+      <div class="filters" style="margin:16px 0">
+        ${dropdown('st-tenant',ts.map(x=>({value:x.id,label:x.name,sub:meterById(x.meter)?.name,dot:tColor(x)})),t.id,v=>{UI.rep.stTenant=v;render();},{label:'Tenant',icon:'user'})}
+        ${calPicker('st-cal',{meters:[t.meter],value:date,label:'Billing period',onChange:v=>{UI.rep.stDate=v;render();}})}
+      </div>
+      <div class="row">
+        <button class="btn primary" onclick="downloadStatement('${t.id}','${date}')">${ic('download',16)} Download JPEG</button>
+        ${p?`<button class="btn" onclick="bulkStatements(null,'${date}')">${ic('users',16)} All tenants (JPEG)</button>`:''}
+      </div>
+    </div>
+    <div class="card st-preview"><img id="st-img" alt="Statement preview"></div>
+  </div>`;
+}
+afterRender.reports = ()=>{ if(UI.rep.tab==='statements'){ const img=$('#st-img'); if(img) statementJPEG(UI.rep.stTenant,UI.rep.stDate).then(r=>{ if(r) img.src=r.url; }); } };
+
+/* ---------- print to PDF ---------- */
+function printEl(sel,title){
+  const src=$(sel); if(!src) return;
+  $('#print-root').innerHTML = `<div class="print-head"><b>House Bills.</b><span>${esc(title)}</span><span>Generated ${fmtD(todayISO(),true)}</span></div>${src.outerHTML}`;
+  document.body.classList.add('print-one');
+  setTimeout(()=>window.print(),60);
+}
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-one'));
+
+/* ---------- tenant statement (JPEG via canvas) ---------- */
+function statementData(tid,date){
+  const t=tenant(tid), m=meterById(t.meter), p=periodAt(t.meter,date);
+  const c=p?compute(p):null, r=c?c.rows.find(x=>x.t.id===tid):null;
+  const dues=p?rentDuesRange(p.from,p.to).filter(d=>d.t.id===tid):[];
+  const prevE=p?allUnpaidElectric().filter(x=>x.r.t.id===tid&&x.p.from<p.from):[];
+  const prevR=[]; if(p) for(let k=S.rentStart;k<=ym(p.from);k=ymAdd(k,1)) rentDues(k).forEach(d=>{ if(d.t.id===tid&&!d.paid&&d.date<p.from) prevR.push(d); });
+  const elecDue = r&&r.ready&&c.ready&&!r.paid ? r.total : 0;
+  const rentDue = sum(dues,d=>d.paid?0:d.amount);
+  const prevBal = sum(prevE,x=>x.r.total)+sum(prevR,d=>d.amount);
+  return {t,m,p,c,r,dues,prevE,prevR,elecDue,rentDue,prevBal,total:elecDue+rentDue+prevBal};
+}
+async function statementJPEG(tid,date){
+  if(!tenant(tid)) return null;
+  CC.clear();
+  const D=statementData(tid,date);
+  try{ await document.fonts.load('600 20px Poppins'); await document.fonts.ready; }catch{}
+  const W=1080, C={bg:'#f6f6f9',card:'#ffffff',ink:'#2b2c40',ink2:'#55566c',muted:'#9a9ab0',line:'#eeeef3',accent:'#e8704f',navy:'#33345a',green:'#2fa877',gsoft:'#e4f5ee',red:'#e5484d',rsoft:'#fdecec',ysoft:'#fdf5e2',y:'#b98a1f'};
+  const F=(w,s)=>`${w} ${s}px Poppins, "Segoe UI", Arial, sans-serif`;
+  const ops=[]; let y=160; const L=130, R=W-130;
+  const text=(s,x,yy,font,color,align='left')=>ops.push(c=>{c.font=font;c.fillStyle=color;c.textAlign=align;c.fillText(s,x,yy);});
+  const line=yy=>ops.push(c=>{c.fillStyle=C.line;c.fillRect(L,yy,R-L,2);});
+  const rr=(c,x,yy,w,h,r)=>{c.beginPath();c.moveTo(x+r,yy);c.arcTo(x+w,yy,x+w,yy+h,r);c.arcTo(x+w,yy+h,x,yy+h,r);c.arcTo(x,yy+h,x,yy,r);c.arcTo(x,yy,x+w,yy,r);c.closePath();};
+  const pill=(s,xr,yy,bg,fg)=>ops.push(c=>{c.font=F(600,20);const w=c.measureText(s).width+34;rr(c,xr-w,yy-31,w,42,21);c.fillStyle=bg;c.fill();c.fillStyle=fg;c.textAlign='right';c.fillText(s,xr-17,yy-3);});
+  const kv=(k,v,bold=false)=>{ text(k,L,y,F(400,27),C.ink2); text(v,R,y,F(bold?700:500,27),C.ink,'right'); y+=54; };
+  const section=title=>{ y+=24; text(title.toUpperCase(),L,y,F(600,21),C.accent); y+=22; line(y); y+=58; };
+
+  const y0=y; ops.push(c=>{c.font=F(700,40);c.fillStyle=C.ink;c.textAlign='left';c.fillText('House Bills',L,y0);const w=c.measureText('House Bills').width;c.fillStyle=C.accent;c.fillText('.',L+w,y0);});
+  text('BILLING STATEMENT',R,y-6,F(600,21),C.muted,'right');
+  y+=96; text(D.t.name,L,y,F(700,58),C.ink);
+  y+=50; text(`${D.m?D.m.name:''} meter · ${D.m?D.m.floor:''}`,L,y,F(400,26),C.muted);
+  y+=44; text(D.p?`Billing period: ${periodLabel(D.p)}`:`No billing period on ${fmtD(date,true)}`,L,y,F(500,26),C.ink2);
+  y+=20;
+
+  section('Electricity');
+  const r=D.r;
+  if(!D.p||!r){ text('Not on this meter for this period.',L,y,F(400,26),C.muted); y+=54; }
+  else if(!r.ready||!D.c.ready){ text('Waiting for meter readings / Meralco bill.',L,y,F(400,26),C.muted); y+=54; }
+  else {
+    if(r.kind==='submeter'){ kv('Previous reading',kwhF(r.prev)); kv('Current reading',kwhF(r.curr)); kv('Consumed',kwhF(r.kwh)+' kWh'); kv('Rate',peso(D.p.rate,2)+' / kWh'); kv('Amount (rounded up)',peso(r.raw)); if(r.minAdj) kv(`Minimum charge top-up (${peso(r.t.min)})`,'+'+peso(r.minAdj)); }
+    else { kv('Meralco bill',peso(D.p.bill,2)); kv('Less: submetered tenants','− '+peso(D.c.subRaw)); kv('Your share',peso(r.raw)); }
+    if(r.manual) kv('Adjustment',(r.manual>0?'+':'')+peso(r.manual));
+    y+=8; text('Electric total',L,y,F(600,29),C.ink); text(peso(r.total),R-(r.paid?200:150),y,F(700,30),C.ink,'right');
+    if(r.paid) pill('PAID '+fmtD(r.paid).toUpperCase(),R,y+4,C.gsoft,C.green); else pill('UNPAID',R,y+4,C.ysoft,C.y);
+    y+=58;
+  }
+  if(D.dues.length || D.t.rent){
+    section('Rent');
+    if(!D.dues.length){ text('No rent due in this period.',L,y,F(400,26),C.muted); y+=54; }
+    D.dues.forEach(d=>{ const s=rentStatus(d); text(`Due ${fmtD(d.date,true)}${d.part?` (${d.part})`:''}`,L,y,F(400,27),C.ink2); text(peso(d.amount),R-230,y,F(600,27),C.ink,'right');
+      pill(s.txt.toUpperCase(),R,y+4,s.cls==='ok'?C.gsoft:s.cls==='bad'?C.rsoft:s.cls==='warn'?C.ysoft:C.bg,s.cls==='ok'?C.green:s.cls==='bad'?C.red:s.cls==='warn'?C.y:C.muted); y+=60; });
+  }
+  if(D.prevBal>0){
+    section('Earlier unpaid balance');
+    D.prevE.forEach(x=>kv(`Electric · ${periodLabel(x.p)}`,peso(x.r.total)));
+    D.prevR.forEach(d=>kv(`Rent · due ${fmtD(d.date,true)}`,peso(d.amount)));
+  }
+  y+=30; const boxY=y;
+  ops.push(c=>{ rr(c,L-24,boxY,R-L+48,200,26); c.fillStyle=C.navy; c.fill();
+    c.font=F(500,22); c.fillStyle='rgba(255,255,255,.7)'; c.textAlign='left'; c.fillText('TOTAL AMOUNT DUE',L+16,boxY+66);
+    c.font=F(700,66); c.fillStyle='#ffffff'; c.fillText(peso(D.total),L+16,boxY+150);
+    c.font=F(500,22); c.textAlign='right'; c.fillStyle=D.total?'#f5a487':'#7fe0b4'; c.fillText(D.total?'Please settle on or before the due date':'Fully paid — thank you!',R-16,boxY+150); });
+  y+=200+76;
+  text(`Generated ${fmtD(todayISO(),true)} · House Bills`,W/2,y,F(400,21),C.muted,'center');
+  const H=y+100;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const c=cv.getContext('2d');
+  c.fillStyle=C.bg; c.fillRect(0,0,W,H); rr(c,60,60,W-120,H-120,36); c.fillStyle=C.card; c.fill();
+  c.save(); rr(c,60,60,W-120,H-120,36); c.clip(); c.fillStyle=C.accent; c.fillRect(60,60,W-120,12); c.restore();
+  ops.forEach(f=>f(c));
+  return {url:cv.toDataURL('image/jpeg',0.92), name:`${slug(D.t.name)}-statement-${D.p?D.p.from:date}.jpg`};
+}
+async function downloadStatement(tid,date){ const r=await statementJPEG(tid,date); if(!r) return; const a=document.createElement('a'); a.href=r.url; a.download=r.name; document.body.appendChild(a); a.click(); a.remove(); }
+async function bulkStatements(mid,date){
+  const ts=liveTenants().filter(t=>{ if(mid&&t.meter!==mid) return false; const p=periodAt(t.meter,date); if(!p) return false;
+    return compute(p).rows.some(r=>r.t.id===t.id) || rentDuesRange(p.from,p.to).some(d=>d.t.id===t.id); });
+  if(!ts.length){ toast('No tenants for that period'); return; }
+  toast(`Downloading ${ts.length} statements…`);
+  for(const t of ts){ await downloadStatement(t.id,date); await new Promise(r=>setTimeout(r,350)); }
+}
+async function openStatement(tid,date){
+  const r=await statementJPEG(tid,date); if(!r) return;
+  $('#modal-card').innerHTML=`<div class="card-h" style="margin-bottom:12px"><h2>${esc(tenant(tid).name)} — statement</h2><button class="icon-btn sm" onclick="closeModal()">${ic('x',16)}</button></div>
+    <img src="${r.url}" alt="Statement"><div class="row" style="margin-top:14px"><button class="btn primary" onclick="downloadStatement('${tid}','${date}')">${ic('download',16)} Download JPEG</button><button class="btn" onclick="closeModal()">Close</button></div>`;
+  $('#modal').classList.add('open');
+}
+function closeModal(){ $('#modal').classList.remove('open'); }
+
+/* ======================= SETTINGS ======================= */
+function acc(key,icon,title,desc,body){
+  return `<div class="acc ${UI.set.open[key]?'open':''}"><div class="acc-h" onclick="UI.set.open.${key}=!UI.set.open.${key};render()"><div class="tile">${ic(icon,20)}</div><div class="grow"><h2>${title}</h2><div class="muted small">${desc}</div></div><span class="chev">${ic('chev',18)}</span></div><div class="acc-b">${body}</div></div>`;
+}
+function viewSettings(){
+  return `<div class="page-head"><div><h1>Settings</h1><p class="sub">Meters, billing dates, tenants and your data.</p></div></div>
+  ${acc('meters','gauge','Meter setup',`${S.meters.length} meters · names and billing dates`,meterSetup())}
+  ${acc('tenants','users','Tenants setup',`${liveTenants().length} tenants · details, billing type and rent`,tenantSetup())}
+  ${acc('rules','info','How amounts are computed','Same rules as your spreadsheet',`<ul class="small" style="margin:16px 0 0;padding-left:18px;line-height:1.9;color:var(--ink2)">
+    <li><b>Own submeter:</b> (current − previous) × rate, rounded up to the peso.</li>
+    <li><b>Minimum charge:</b> if the amount is below the tenant's minimum (e.g. ₱500), the difference is added.</li>
+    <li><b>No submeter (pays remainder):</b> Meralco bill − all submeter amounts (before minimum top-ups). Two or more such tenants split it evenly.</li>
+    <li><b>Adjustment:</b> any ± amount you type is added to that tenant's total.</li>
+    <li><b>Billing period:</b> from the meter's billing start day to the day before it next month (e.g. 25th → 24th).</li></ul>`)}
+  ${acc('data','db','Data & backup',CLOUD?'Synced to the cloud':'Saved in this browser only',`<div class="row" style="margin-top:16px">
+      <button class="btn" onclick="exportData()">${ic('download',16)} Export backup (.json)</button>
+      <label class="btn">${ic('file',16)} Import backup<input type="file" accept=".json" style="display:none" onchange="importData(this.files[0])"></label>
+      ${window.SEED_PERIODS?'<button class="btn danger" onclick="resetData()">Reset to spreadsheet data</button>':''}</div>
+      <p class="muted small" style="margin-bottom:0">${CLOUD?`Saved to your cloud database${session?' · signed in as '+esc(session.user.email):''} · `:''}${S.periods.length} billing periods · rent tracked from ${ymLabel(S.rentStart)}</p>`)}`;
+}
+function meterSetup(){
+  const d=UI.set.meterDraft;
+  const form = d ? `<div class="form-box"><div class="form">
+      <label class="f">Meter name<input value="${esc(d.name)}" oninput="UI.set.meterDraft.name=this.value" placeholder="e.g. Main house"></label>
+      <label class="f">Floor / label<input value="${esc(d.floor)}" oninput="UI.set.meterDraft.floor=this.value" placeholder="e.g. 1st floor"></label>
+      <label class="f">Billing start day${dropdown('m-day',Array.from({length:28},(_,i)=>({value:i+1,label:`Every ${ordinal(i+1)}`,sub:`period ${ordinal(i+1)} → ${i===0?'end of month':ordinal(i)}`})),d.startDay,v=>{UI.set.meterDraft.startDay=Number(v);render();})}</label>
+      <label class="f">Meralco account no. (optional)<input value="${esc(d.account||'')}" oninput="UI.set.meterDraft.account=this.value" placeholder="CAN"></label>
+    </div><div class="row" style="margin-top:14px">${d.id?'<span class="muted small">A new billing day applies to the next period you start.</span>':''}<div class="spacer"></div>
+    <button class="btn ghost" onclick="UI.set.meterDraft=null;render()">Cancel</button><button class="btn primary" onclick="saveMeter()">${ic('check',16)} ${d.id?'Save changes':'Add meter'}</button></div></div>` : '';
+  return `<div class="row" style="margin-top:16px"><span class="muted small">Each meter is one Meralco account with its own tenants and billing date.</span><div class="spacer"></div><button class="btn primary" onclick="UI.set.meterDraft={id:null,name:'',floor:'',startDay:25,account:''};render()">${ic('plus',16)} Add meter</button></div>
+    ${d&&!d.id?form:''}
+    <div class="tbl-wrap"><table><thead><tr><th>Meter</th><th>Billing period</th><th class="n">Tenants</th><th class="n">Periods</th><th>Account no.</th><th></th></tr></thead><tbody>
+    ${S.meters.map(m=>`<tr><td><div class="who"><span class="av" style="background:${mColor(m)}">${ic('gauge',16)}</span><div><div class="strong">${esc(m.name)}</div><div class="muted small">${esc(m.floor||'')}</div></div></div></td>
+      <td>Every ${ordinal(m.startDay)} → ${m.startDay===1?'end of month':ordinal(m.startDay-1)}</td>
+      <td class="n">${liveTenants().filter(t=>t.meter===m.id).length}</td><td class="n">${meterPeriods(m.id).length}</td><td class="muted">${esc(m.account||'—')}</td>
+      <td class="n"><button class="icon-btn sm" title="Edit" onclick="UI.set.meterDraft={...meterById('${m.id}')};render()">${ic('edit',15)}</button> <button class="icon-btn sm" title="Delete" onclick="deleteMeter('${m.id}')">${ic('trash',15)}</button></td></tr>
+      ${d&&d.id===m.id?`<tr><td colspan="6" style="white-space:normal;border:0;padding:0">${form}</td></tr>`:''}`).join('')}
+    </tbody></table></div>`;
+}
+function saveMeter(){
+  const d=UI.set.meterDraft; if(!d.name.trim()){ toast('Give the meter a name'); return; }
+  d.startDay=Math.min(28,Math.max(1,Number(d.startDay)||25));
+  if(d.id){ Object.assign(meterById(d.id),d); toast('Meter saved'); }
+  else { d.id=slug(d.name)+'-'+uid(); S.meters.push({...d}); toast('Meter added — start its first period in Electric billing'); }
+  UI.set.meterDraft=null; save(); render();
+}
+function deleteMeter(id){
+  const m=meterById(id);
+  if(liveTenants().some(t=>t.meter===id)){ alert(`Move or delete the tenants on ${m.name} first.`); return; }
+  const n=meterPeriods(id).length;
+  if(!confirm(`Delete meter “${m.name}”${n?` and its ${n} billing periods`:''}? This cannot be undone.`)) return;
+  S.periods=S.periods.filter(p=>p.meter!==id); S.meters=S.meters.filter(x=>x.id!==id); S.tenants=S.tenants.filter(t=>!(t.deleted&&t.meter===id));
+  save(); render(); toast('Meter deleted');
+}
+function tenantSetup(){
+  const d=UI.set.tenantDraft;
+  const form = d ? `<div class="form-box"><div class="form">
+      <label class="f">Full name<input value="${esc(d.name)}" oninput="UI.set.tenantDraft.name=this.value" placeholder="e.g. Juan Dela Cruz"></label>
+      <label class="f">Contact no.<input value="${esc(d.phone||'')}" oninput="UI.set.tenantDraft.phone=this.value" placeholder="09xx xxx xxxx"></label>
+      <label class="f">Meter${dropdown('t-meter',meterOpts(false),d.meter,v=>{UI.set.tenantDraft.meter=v;render();})}</label>
+      <label class="f">Electric billing${dropdown('t-type',[{value:'submeter',label:'Own submeter',sub:'billed by reading × rate'},{value:'remainder',label:'No submeter',sub:'pays the rest of the bill'}],d.type,v=>{UI.set.tenantDraft.type=v;render();})}</label>
+      <label class="f">Minimum electric charge (₱)<input type="number" value="${d.min||''}" oninput="UI.set.tenantDraft.min=Number(this.value)||0" placeholder="none"></label>
+      <label class="f">Monthly rent (₱)<input type="number" value="${d.rent||''}" oninput="UI.set.tenantDraft.rent=Number(this.value)||0" placeholder="0"></label>
+      <label class="f">Rent due day(s)<input value="${esc(d.dueText!==undefined?d.dueText:(d.due||[]).join(', '))}" oninput="UI.set.tenantDraft.dueText=this.value" placeholder="e.g. 15 or 10, 25"></label>
+      <label class="f">Move-in date<input type="date" value="${d.moveIn||''}" oninput="UI.set.tenantDraft.moveIn=this.value"></label>
+    </div>
+    <div class="row" style="margin-top:14px"><label class="row" style="gap:8px;cursor:pointer"><span class="switch"><input type="checkbox" ${d.active?'checked':''} onchange="UI.set.tenantDraft.active=this.checked"><i></i></span><span>Active tenant</span></label>
+      <div class="spacer"></div><button class="btn ghost" onclick="UI.set.tenantDraft=null;render()">Cancel</button><button class="btn primary" onclick="saveTenant()">${ic('check',16)} ${d.id?'Save changes':'Add tenant'}</button></div></div>` : '';
+  const ts=liveTenants();
+  return `<div class="row" style="margin-top:16px"><span class="muted small">Expected monthly rent: <b style="color:var(--ink)">${peso(sum(ts.filter(t=>t.active),t=>t.rent))}</b></span><div class="spacer"></div>
+      <button class="btn primary" onclick="UI.set.tenantDraft={id:null,name:'',phone:'',meter:'${S.meters[0]?.id||''}',type:'submeter',min:0,rent:0,due:[],moveIn:'',active:true};render()">${ic('plus',16)} Add tenant</button></div>
+    ${d&&!d.id?form:''}
+    <div class="list">${ts.map(t=>`<div class="item"><span class="av" style="background:${tColor(t)};width:40px;height:40px">${initials(t.name)}</span>
+      <div class="grow"><div class="t">${esc(t.name)} ${t.active?'':'<span class="pill mute">Inactive</span>'}</div>
+        <div class="s">${esc(meterById(t.meter)?.name||'No meter')} · ${t.type==='submeter'?'Own submeter':'No submeter (remainder)'}${t.min?` · min ${peso(t.min)}`:''}${t.phone?` · ${esc(t.phone)}`:''}</div></div>
+      <div class="acts"><span class="small muted" style="text-align:right;line-height:1.35">${t.rent?`<b style="color:var(--ink)">${peso(t.rent)}</b>/mo<br>due ${t.due.map(ordinal).join(' & ')}`:'no rent'}</span>
+        <button class="icon-btn sm" title="Edit" onclick="UI.set.tenantDraft=structuredClone(tenant('${t.id}'));render()">${ic('edit',15)}</button>
+        <button class="icon-btn sm" title="Delete" onclick="deleteTenant('${t.id}')">${ic('trash',15)}</button></div></div>
+      ${d&&d.id===t.id?form:''}`).join('')}</div>`;
+}
+function saveTenant(){
+  const d=UI.set.tenantDraft; if(!d.name.trim()){ toast('Enter a name'); return; } if(!meterById(d.meter)){ toast('Choose a meter'); return; }
+  if(d.dueText!==undefined){ d.due=d.dueText.split(/[,\s&]+/).map(Number).filter(n=>n>=1&&n<=31); delete d.dueText; }
+  if(d.rent>0 && !d.due.length){ toast('Add the rent due day(s)'); return; }
+  if(d.id){ Object.assign(tenant(d.id),d); toast('Tenant saved'); }
+  else { d.id='t'+uid(); S.tenants.push({...d,deleted:false}); toast('Tenant added'); }
+  UI.set.tenantDraft=null; save(); render();
+}
+function deleteTenant(id){
+  const t=tenant(id); if(!confirm(`Delete ${t.name}? Their past bills stay in the reports.`)) return;
+  const hasHistory=S.periods.some(p=>(p.readings[id]&&p.readings[id].curr!=null)||p.paid[id]||p.adj[id]) || Object.values(S.rent).some(m=>Object.keys(m).some(k=>k.startsWith(id+'#')));
+  S.periods.forEach(p=>{ if(p.readings[id] && p.readings[id].curr==null) delete p.readings[id]; });
+  if(hasHistory){ t.deleted=true; t.active=false; } else S.tenants=S.tenants.filter(x=>x.id!==id);
+  save(); render(); toast('Tenant deleted');
+}
+function exportData(){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'})); a.download=`house-bills-backup-${todayISO()}.json`; a.click(); }
+function importData(f){ if(!f) return; f.text().then(t=>{ try{ const s=migrate(JSON.parse(t)); if(s.version!==2) throw 0; S=s; save(); render(); toast('Backup imported'); }catch{ alert('That file is not a House Bills backup.'); } }); }
+function resetData(){ if(!confirm('Replace everything with the data from Meralco_Computation.xlsx? Payments, meters and tenants you changed here will be lost (export a backup first).')) return; S=buildSeed(); save(); UI.bill.periodId=null; render(); toast('Reset to spreadsheet data'); }
+
+/* ---------- cloud (Supabase) ---------- */
+let sb=null, session=null, syncTimer=null, syncState='saved', lastRemote=null;
+const SUPA_CDN='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+function setSync(state,msg){ syncState=state; const el=$('#sync'); if(!el) return; el.hidden=!CLOUD||!session; el.className='sync '+state; el.innerHTML=`<i></i><span>${msg}</span>`; }
+function queueSync(){ if(!sb||!session) return; clearTimeout(syncTimer); setSync('pending','Saving…'); syncTimer=setTimeout(pushCloud,700); }
+async function pushCloud(){
+  clearTimeout(syncTimer);
+  const now=new Date().toISOString();
+  const {error}=await sb.from('house_data').upsert({id:'main',data:S,updated_at:now,updated_by:session.user.id});
+  if(error){ setSync('error','Not saved — retrying'); syncTimer=setTimeout(pushCloud,8000); return false; }
+  lastRemote=now; setSync('saved','Saved'); return true;
+}
+async function pullCloud(initial){
+  const {data,error}=await sb.from('house_data').select('data,updated_at').eq('id','main').maybeSingle();
+  if(error){ if(initial){ alert('Could not load data from the database: '+error.message+'\n\nCheck config.js and that you ran supabase-setup.sql.'); } return; }
+  if(!data){ if(initial){ S=buildSeed(); try{localStorage.setItem(STORE_KEY,JSON.stringify(S));}catch{} } return; }
+  if(!initial && lastRemote && data.updated_at<=lastRemote) return;
+  S=migrate(data.data); lastRemote=data.updated_at;
+  try{ localStorage.setItem(STORE_KEY,JSON.stringify(S)); }catch{}
+  if(!initial){ render(); toast('Updated with changes from another device'); }
+}
+function showAuth(){ document.body.classList.add('locked'); $('#auth').hidden=false; $('#au-err').textContent=''; setTimeout(()=>$('#au-email').focus(),50); }
+async function startCloud(s){
+  session=s; $('#auth').hidden=true; document.body.classList.remove('locked');
+  $('#logout-btn').hidden=false; $('#logout-btn').innerHTML=ic('logout',17);
+  setSync('pending','Loading…'); await pullCloud(true); setSync('saved','Saved'); render();
+}
+async function signIn(e){
+  e.preventDefault(); const btn=$('#au-btn'); btn.disabled=true; btn.textContent='Signing in…';
+  const {data,error}=await sb.auth.signInWithPassword({email:$('#au-email').value.trim(),password:$('#au-pass').value});
+  btn.disabled=false; btn.textContent='Sign in';
+  if(error){ $('#au-err').textContent=error.message==='Invalid login credentials'?'Wrong email or password.':error.message; return; }
+  $('#au-pass').value=''; await startCloud(data.session);
+}
+async function signOut(){
+  if(!confirm('Sign out of House Bills?')) return;
+  if(syncState!=='saved') await pushCloud();
+  await sb.auth.signOut(); session=null; S=null;
+  try{ localStorage.removeItem(STORE_KEY); }catch{}
+  $('#logout-btn').hidden=true; setSync('saved',''); showAuth();
+}
+window.addEventListener('focus',()=>{ if(sb&&session&&syncState==='saved') pullCloud(false); });
+window.addEventListener('online',()=>{ if(sb&&session&&syncState!=='saved') pushCloud(); });
+window.addEventListener('beforeunload',e=>{ if(CLOUD&&session&&syncState!=='saved'){ e.preventDefault(); e.returnValue=''; } });
+
+/* ---------- boot ---------- */
+(async function boot(){
+  const th=pref('theme'); if(th) document.documentElement.dataset.theme=th;
+  if(pref('collapsed')==='1') $('#layout').classList.add('collapsed');
+  if(CLOUD){
+    document.body.classList.add('locked');
+    try{ await loadScript(SUPA_CDN); }catch{ document.body.innerHTML='<p style="padding:40px;font-family:sans-serif">Could not load the sign-in library. Check your internet connection and reload.</p>'; return; }
+    sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
+    const {data}=await sb.auth.getSession();
+    if(data.session) await startCloud(data.session); else showAuth();
+    sb.auth.onAuthStateChange((ev,s)=>{ if(ev==='SIGNED_OUT'&&session){ session=null; showAuth(); } else if(s) session=s; });
+  } else {
+    // local mode (opened from your computer): load spreadsheet data from the Prototype folder
+    for(const src of ['../seed-data.js','seed-data.js']){ try{ await loadScript(src); break; }catch{} }
+    load(); render();
+  }
+})();
+</script>
+</body>
+</html>
